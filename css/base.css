@@ -17,7 +17,7 @@ button{cursor:pointer}
 .page{display:none}
 .page.active{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:20px;min-width:0}
-.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:27px 0 13px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;margin:27px 0 13px}
 .page>.sectionhead:first-child{margin-top:0}
 .sectionhead h3{margin:0;font-size:17px;letter-spacing:-.3px}
 .sectionhead a,.link{color:var(--green);font-weight:750;text-decoration:none;cursor:pointer}

@@ -51,11 +51,10 @@ function drawCharts() {
 // ---------- startup ----------
 buildNav();
 renderMealIdeas();
-renderQuickFoods();
 renderTraining();
 renderSchedule();
 document.getElementById('workDate').value = today();
-if (!cloud() && !(state.foods[NOV1_DATE] || []).length) importNov1(true);
+if (!cloud() && !(state.foods[NOV1_DATE] || []).length) importNov1();
 
 const initial = location.hash.slice(1);
 go(PAGES.some((p) => p[0] === initial) ? initial : 'dashboard');
@@ -73,6 +72,7 @@ window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer
 let renderedDay = today();
 setInterval(() => {
   if (today() === renderedDay) return;
+  if (nutritionDate === renderedDay) nutritionDate = today(); // keep following "today"
   renderedDay = today();
   renderSchedule();
   render();

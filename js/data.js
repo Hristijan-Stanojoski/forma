@@ -26,6 +26,13 @@ const DIET_NOTES = [
   'Fruit and vegetables, with adequate protein and healthy fats.',
 ];
 
+const DIET_TIPS = [
+  { good: 'Chicken, turkey, lean beef, fish, eggs, Greek yogurt, cottage cheese, big salads and green vegetables.', easy: 'Bread, pasta, rice, potatoes, sweets and sugary drinks.' },
+  { good: 'Potatoes, rice, beans, lentils, chickpeas, plenty of vegetables, plus a lean protein portion.', easy: 'Fried sides, creamy sauces, sweets and extra oil.' },
+  { good: 'Pasta, wholegrain bread, oats, bulgur, tomato based sauces, vegetables and a lean protein portion.', easy: 'Cream sauces, pastries and large second helpings.' },
+  { good: 'Fresh fruit, vegetables, salads, soups, plus some yogurt, eggs or fish to keep protein up.', easy: 'Dried fruit, juices, nuts in large amounts and heavy dressings.' },
+];
+
 const MEAL_LABELS = {
   'Mediterranean Pan-Fried Salmon Bowl': '🐟 Mediterranean salmon bowl',
   Fruit: '🍌 Fruit', Drinks: '☕ Coffee & drinks', Breakfast: '🍳 Breakfast',
@@ -38,13 +45,16 @@ const MEAL_IDEAS = [
   { name: 'Pasta with tomato', desc: 'Carbohydrate day • inspiration', cal: 530, img: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=700&auto=format&fit=crop&q=80' },
 ];
 
-const QUICK_FOODS = [
-  { name: 'Banana (medium)', cal: 105, p: 1.3, c: 27, fat: .4, meal: 'Snacks', img: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80' },
-  { name: 'Apple (medium)', cal: 95, p: .5, c: 25, fat: .3, meal: 'Snacks', img: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80' },
-  { name: 'Nescafé + 100 ml milk', cal: 52, p: 3.4, c: 5.2, fat: 2.5, meal: 'Drinks', img: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&auto=format&fit=crop&q=80' },
-  { name: 'Lemon + 1 tsp honey', cal: 28, p: .2, c: 7.5, fat: 0, meal: 'Drinks', img: 'https://images.unsplash.com/photo-1513558161293-cdaf765edfd4?w=500&auto=format&fit=crop&q=80' },
-  { name: 'Whey (30 g)', cal: 120, p: 24, c: 3, fat: 1.5, meal: 'Snacks', img: 'https://images.unsplash.com/photo-1546483875-ad9014c88eba?w=500&auto=format&fit=crop&q=80' },
-  { name: 'Chicken breast (250g raw)', cal: 300, p: 56, c: 0, fat: 6.5, meal: 'Lunch', img: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&auto=format&fit=crop&q=80' },
+const MEALS = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Drinks'];
+
+// Starting favorites. Fixed ids so two devices seeding them do not duplicate on sync.
+const DEFAULT_FAVORITES = [
+  { id: 'fav-banana', name: 'Banana (medium)', cal: 105, p: 1.3, c: 27, fat: .4, meal: 'Snacks' },
+  { id: 'fav-apple', name: 'Apple (medium)', cal: 95, p: .5, c: 25, fat: .3, meal: 'Snacks' },
+  { id: 'fav-nescafe', name: 'Nescafé + 100 ml milk', cal: 52, p: 3.4, c: 5.2, fat: 2.5, meal: 'Drinks' },
+  { id: 'fav-lemon', name: 'Lemon + 1 tsp honey', cal: 28, p: .2, c: 7.5, fat: 0, meal: 'Drinks' },
+  { id: 'fav-whey', name: 'Whey (30 g)', cal: 120, p: 24, c: 3, fat: 1.5, meal: 'Snacks' },
+  { id: 'fav-chicken', name: 'Chicken breast (250g raw)', qty: '250 g raw', cal: 300, p: 56, c: 0, fat: 6.5, meal: 'Lunch' },
 ];
 
 // [day, title, [[exercise, sets, rest], ...]]

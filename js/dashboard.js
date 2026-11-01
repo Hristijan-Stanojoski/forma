@@ -144,12 +144,14 @@ function renderDeficit() {
   setText('deficitActualWeight', currentWeight().toFixed(1) + ' kg');
 
   // Past days (before today) that were never marked complete
-  let missing = 0;
-  for (let d = DIET_START; d < today(); d = addDays(d, 1)) if (!state.completedDays[d]) missing++;
+  const missingDays = [];
+  for (let d = DIET_START; d < today(); d = addDays(d, 1)) if (!state.completedDays[d]) missingDays.push(d);
+  const missing = missingDays.length;
   const todayNote = todayDone ? 'Today is marked complete.' : 'Today is still open, so its deficit will shrink as you log more food.';
-  setText('deficitWarning', missing
-    ? `⚠ ${missing} past day${missing === 1 ? '' : 's'} not marked complete, so ${missing === 1 ? 'it is' : 'they are'} left out. Mark them complete in Nutrition to include them. ${todayNote}`
-    : todayNote);
+  document.getElementById('deficitWarning').innerHTML = missing
+    ? `⚠ ${missing} past day${missing === 1 ? '' : 's'} not marked complete, so ${missing === 1 ? 'it is' : 'they are'} left out. ${todayNote}
+       <a class="link" onclick="setNutritionDate('${missingDays[0]}');go('nutrition')">Review ${dayLabel(missingDays[0])} →</a>`
+    : escapeHTML(todayNote);
   document.getElementById('deficitWarning').style.display = missing || !todayDone ? '' : 'none';
 
   // Charts start from a zero point the day before the first counted day

@@ -31,6 +31,7 @@ function applyDefaults(st) {
   st.workEntries ??= [];
   st.financeEntries ??= [];
   st.groceryItems ??= [];
+  st.favorites ??= DEFAULT_FAVORITES.map((f) => ({ ...f }));
   st.targets ??= {};
   st.targets.protein ??= 140;
   st.targets.water ??= 2.5;

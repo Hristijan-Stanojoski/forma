@@ -110,7 +110,7 @@
           <div><small>Water</small><strong id="diaryWater">0ml</strong></div>
         </div>
         <div class="diary-track"><i id="diaryBar"></i></div>
-        <div class="sectionhead" style="margin:0 0 12px"><h3>Logged meals & drinks</h3><a onclick="go('nutrition')">Edit food log →</a></div>
+        <div class="sectionhead" style="margin:0 0 12px"><h3>Logged meals & drinks</h3><a onclick="setNutritionDate(today());go('nutrition')">Edit food log →</a></div>
         <div id="dashboardMeals" class="diary-meals"></div>
         <p class="note" id="diaryNote"></p>
       </div>
@@ -128,23 +128,54 @@
         </div>
       </div>
 
-      <div class="sectionhead"><h3>Today's meal inspiration</h3><a onclick="go('nutrition')">Open food tracker →</a></div>
+      <div class="sectionhead"><h3>Today's meal inspiration</h3><a onclick="setNutritionDate(today());go('nutrition')">Open food tracker →</a></div>
       <div class="mealgrid" id="mealCards"></div>
     </section>
 
     <!-- ===================== Nutrition ===================== -->
     <section class="page" id="nutrition">
-      <div class="hero" style="grid-template-columns:1fr">
-        <div><small>MODIFIED UN DIET</small><h2 id="dietName">Protein day</h2><p>Four day rotation • Log every meal, coffee and lemonade.</p></div>
+      <div class="daybar">
+        <button class="btn outline" type="button" onclick="shiftNutritionDate(-1)" aria-label="Previous day">◀</button>
+        <input class="field" type="date" id="nutritionDate" onchange="setNutritionDate(this.value)" aria-label="Day to show">
+        <button class="btn outline" type="button" id="nextDayBtn" onclick="shiftNutritionDate(1)" aria-label="Next day">▶</button>
+        <button class="btn secondary" type="button" id="todayBtn" onclick="setNutritionDate(today())">Today</button>
       </div>
 
-      <div class="sectionhead"><h3>Log food & drinks</h3><span class="pill" id="remainingCal"></span></div>
-      <div class="card" style="margin-bottom:12px">
-        <label style="display:flex;align-items:center;gap:10px">
+      <div class="hero diet-hero">
+        <div>
+          <small id="dietDayLabel">MODIFIED UN DIET</small>
+          <h2 id="dietName">Protein day</h2>
+          <p id="dietNote"></p>
+        </div>
+        <div class="diet-tips">
+          <div><b>Good choices</b><p id="dietGood"></p></div>
+          <div><b>Go easy on</b><p id="dietEasy"></p></div>
+        </div>
+      </div>
+
+      <div class="card day-summary-card">
+        <div class="day-totals">
+          <div><small>Eaten</small><strong id="nutriCal">0</strong><small id="nutriCalTarget"></small></div>
+          <div><small>Remaining</small><strong id="remainingCal">0</strong><small>kcal</small></div>
+          <div><small>Protein</small><strong id="nutriProtein">0g</strong><small id="nutriProteinTarget"></small></div>
+          <div><small>Carbs</small><strong id="nutriCarbs">0g</strong></div>
+          <div><small>Fat</small><strong id="nutriFat">0g</strong></div>
+        </div>
+        <div class="water-row">
+          <span>💧 Water <b id="nutriWater">0 ml</b> <small class="muted" id="nutriWaterTarget"></small></span>
+          <span class="water-btns">
+            <button class="btn outline" type="button" onclick="changeWater(-250)" aria-label="Remove 250 ml">− 250</button>
+            <button class="btn secondary" type="button" onclick="changeWater(250)">+ 250 ml</button>
+            <button class="btn secondary" type="button" onclick="changeWater(500)">+ 500 ml</button>
+          </span>
+        </div>
+        <label class="complete-row">
           <input type="checkbox" id="dayComplete" onchange="completeDay(this.checked)">
-          <span><b>All food and drinks logged for today</b><br><small class="muted">Only completed days count toward the estimated deficit. You can still edit food later.</small></span>
+          <span><b id="dayCompleteLabel">All food and drinks logged for today</b><br><small class="muted">Past days count toward the deficit once they are marked complete. You can still edit food afterwards.</small></span>
         </label>
       </div>
+
+      <div class="sectionhead"><h3 id="addFoodTitle">Log food & drinks</h3></div>
       <div class="card">
         <form onsubmit="event.preventDefault();addFood()">
           <div class="formrow">
@@ -152,7 +183,7 @@
             <input class="field" id="foodQty" placeholder="Portion (e.g. 150 g)" autocomplete="off">
             <select class="field" id="foodMeal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option><option>Drinks</option></select>
           </div>
-          <div class="formrow" style="margin-top:10px">
+          <div class="formrow macro-row" style="margin-top:10px">
             <input class="field" id="foodCal" type="number" min="0" inputmode="decimal" placeholder="Calories">
             <input class="field" id="foodProtein" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Protein (g)">
             <input class="field" id="foodCarbs" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Carbs (g)">
@@ -161,19 +192,19 @@
           </div>
         </form>
         <p class="note">Log actual portions. Or just tell Claude or ChatGPT what you ate and it logs everything for you (set it up in Settings).</p>
-        <div class="sectionhead"><h3>Today's entries</h3><b id="nutritionTotal">0 kcal</b></div>
-        <div class="foodlist" id="foodList"></div>
       </div>
 
-      <div class="sectionhead"><h3>Quick add favorites</h3></div>
-      <div class="mealgrid" id="quickFoods"></div>
-
-      <div class="card" style="margin-top:16px">
-        <b>November 1 · Day 1 (Protein)</b>
-        <p class="muted">Import or review the first day meal and drink entries. The salmon bowl ingredients are stored one by one so you can correct them later.</p>
-        <button class="btn secondary" onclick="importNov1()">Import / reconcile Nov 1 entries</button>
-        <p class="note" id="nov1Summary"></p>
+      <div class="sectionhead"><h3>Quick add</h3><small class="muted" id="quickAddTarget"></small></div>
+      <div class="card">
+        <b>⭐ Favorites</b>
+        <div class="chips" id="favoriteChips"></div>
+        <b style="display:block;margin-top:14px">🕘 Recent</b>
+        <div class="chips" id="recentChips"></div>
+        <p class="note">Tap a food to log it. Use ☆ on any entry below to save it as a favorite.</p>
       </div>
+
+      <div class="sectionhead"><h3 id="entriesTitle">Today's entries</h3><b id="nutritionTotal">0 kcal</b></div>
+      <div id="foodList" class="diary-meals"></div>
     </section>
 
     <!-- ===================== Training ===================== -->

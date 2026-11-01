@@ -1,4 +1,58 @@
-/* Nutrition */
+/* Nutrition: day switcher */
+.daybar{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.daybar .field{flex:0 1 190px;padding:9px 11px;font-weight:700}
+.daybar .btn{padding:9px 14px}
+.daybar .btn:disabled{opacity:.35;cursor:default}
+
+/* Nutrition: diet day banner with tips */
+.diet-hero{grid-template-columns:1fr 1.3fr}
+.diet-hero h2{font-size:31px}
+.diet-tips{display:grid;gap:10px;align-content:center;position:relative;z-index:1}
+.diet-tips>div{background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:12px 15px}
+.diet-tips b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#a9e8bf}
+.diet-tips p{margin:4px 0 0;font-size:13px;color:#e3f1e8}
+
+/* Nutrition: day summary */
+.day-summary-card{margin-top:16px}
+.day-totals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.day-totals>div{background:#f3f8f4;padding:12px 13px;border-radius:12px;min-width:0}
+.day-totals small{display:block;color:#73867a;font-size:11px}
+.day-totals strong{display:block;font-size:22px;letter-spacing:-.6px}
+.day-totals strong.over{color:#b5473a}
+.water-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;padding:11px 13px;border:1px solid var(--line);border-radius:12px}
+.water-btns{display:flex;gap:6px;flex-wrap:wrap}
+.water-btns .btn{padding:7px 11px;font-size:13px}
+.complete-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+.complete-row input{width:19px;height:19px;accent-color:var(--green);flex-shrink:0}
+
+/* Nutrition: quick add chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.chip{display:inline-flex;align-items:stretch;border:1px solid #d5e7db;background:#f4faf6;border-radius:99px;overflow:hidden;max-width:100%}
+.chip button{border:0;background:transparent;color:var(--text)}
+.chip-main{display:flex;align-items:baseline;gap:6px;padding:7px 4px 7px 13px;font-weight:650;min-width:0}
+.chip-main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-main small{color:var(--green);font-weight:750;white-space:nowrap}
+.chip-main:only-child{padding-right:13px}
+.chip-x{padding:0 11px 0 7px;color:#9aa8a0!important;font-size:12px}
+.chip:hover{border-color:var(--green)}
+
+/* Nutrition: entries and inline editing */
+.food-entry{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 14px;border-top:1px solid #edf2ee;font-size:13px;cursor:pointer}
+.food-entry:hover{background:#f8fbf9}
+.food-entry-text{flex:1;min-width:0;overflow-wrap:anywhere}
+.food-entry-text small{display:block;color:#73867a}
+.food-entry strong{white-space:nowrap}
+.food-actions{display:flex;gap:2px}
+.food-actions button{border:0;background:transparent;width:32px;height:32px;border-radius:8px;color:#9aa8a0;font-size:15px}
+.food-actions button:hover{background:#eef4f0}
+.food-actions button.on{color:#e0a22f}
+.food-actions button:last-child{color:#bd6b64}
+.food-edit{display:grid;gap:9px;padding:12px 14px;border-top:1px solid #edf2ee;background:#f8fbf9}
+.food-edit label{display:grid;gap:4px;flex:1;min-width:0;font-size:11px;font-weight:700;color:#697870}
+.food-edit-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn.danger{background:#fceeee;color:#a34848;margin-left:auto}
+
+/* Training lists */
 .foodlist{display:grid;gap:8px}
 .fooditem{display:flex;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
 .fooditem>div:first-child{min-width:0;overflow-wrap:anywhere}
@@ -55,6 +109,15 @@
 .expense-track i{display:block;height:100%;background:var(--green)}
 
 @media(max-width:720px){
+  .diet-hero{grid-template-columns:1fr}
+  .diet-hero h2{font-size:27px}
+  .day-totals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .day-totals>div:first-child{grid-column:1/-1}
+  .daybar .field{flex:1}
+  .food-edit .formrow,.macro-row{flex-direction:row;flex-wrap:wrap}
+  .food-edit .formrow>*,.macro-row>*{flex:1 1 40%}
+  .macro-row>.btn{flex-basis:100%}
+  .food-actions button{width:36px;height:36px}
   .workouts{grid-template-columns:1fr}
   .days{grid-template-columns:repeat(4,1fr)}
   .measure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
