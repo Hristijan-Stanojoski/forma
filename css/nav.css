@@ -6,6 +6,12 @@
 .nav button{width:100%;border:0;background:transparent;color:#697870;padding:12px 14px;text-align:left;border-radius:11px;font-weight:650}
 .nav button.active{background:var(--light);color:var(--green)}
 .nav button span{display:inline-block;width:28px;font-size:18px}
+.nav .caret{font-style:normal;float:right;font-size:12px;transition:transform .2s}
+.nav .has-sub[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.subnav{display:none;gap:2px;margin:0 0 4px 22px;padding-left:10px;border-left:2px solid var(--line)}
+.subnav.open{display:grid}
+.subnav button{padding:9px 12px;font-size:13px}
+.menu-group{grid-column:1/-1;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 4px 0}
 .sidebar-bottom{position:absolute;bottom:26px;left:26px;right:17px;color:var(--muted);font-size:12px}
 
 /* Mobile: header menu plus scrollable bottom tabs */

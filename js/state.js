@@ -47,6 +47,19 @@ function applyDefaults(st) {
   st.events ??= [];        // schedule plans: {id, date, title, time?, done}
   st.workoutsDone ??= {};  // date -> true when that day's gym session is done
   st.workSettings = { ...WORK_DEFAULTS, ...(st.workSettings || {}) };
+  // The main job used to be called "Main job"; it is Confect now.
+  if (st.workSettings.job === 'Main job') {
+    st.workSettings.job = 'Confect';
+    for (const w of st.workEntries) if (w.job === 'Main job') w.job = 'Confect';
+  }
+  st.workTasks ??= []; // {id, project, title, status: 'todo' | 'doing' | 'done', due, createdAt, doneAt?}
+  // Tag work entries with their project once, so renaming the job later keeps them in Confect.
+  const plain = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const w of st.workEntries) {
+    if (w.project) continue;
+    const p = w.job === st.workSettings.job ? PROJECTS[0] : PROJECTS.find((x) => plain(x.name) === plain(w.job) || x.key === plain(w.job));
+    if (p) w.project = p.key;
+  }
   // account -> [{id, date, balance, kind: 'start' | 'update' | 'withdrawal', amount?, fromUsd?}]
   st.balances ??= {};
   for (const [key, , , , , start] of ACCOUNTS) st.balances[key] ??= [{ id: 'start-' + key, date: DIET_START, balance: start, kind: 'start' }];

@@ -1,4 +1,4 @@
-// Home tasks, work hours and finances (transactions + grocery list).
+// Home tasks and finances (balances, transactions, grocery list). Work lives in work.js.
 
 const moduleStat = (label, value) => `<div class="module-stat"><small>${label}</small><strong>${value}</strong></div>`;
 const money = (n) => '€' + n.toFixed(2);
@@ -27,95 +27,6 @@ function deleteChore(id) {
   state.homeTasks = state.homeTasks.filter((x) => x.id !== id);
   persist();
   render();
-}
-
-// ---------- work ----------
-function addWork(e) {
-  e.preventDefault();
-  const job = val('workJob').trim(), hours = Number(val('workHours'));
-  if (!job || !Number.isFinite(hours) || hours <= 0 || hours > 24) return;
-  state.workEntries.push({ id: Date.now(), job, date: val('workDate'), hours, description: val('workDescription').trim() });
-  persist();
-  e.target.reset();
-  document.getElementById('workDate').value = today();
-  render();
-}
-function deleteWork(id) {
-  state.workEntries = state.workEntries.filter((x) => x.id !== id);
-  persist();
-  render();
-}
-
-// ---------- main job workdays ----------
-const fmtHours = (h) => { const m = Math.round(h * 60); return `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}`; };
-const workdayOn = (date) => state.workEntries.find((w) => w.kind === 'workday' && w.date === date && w.job === state.workSettings.job);
-function workWeekTotals(weekStart) {
-  const end = addDays(weekStart, 6), job = state.workSettings.job;
-  const entries = state.workEntries.filter((w) => w.date >= weekStart && w.date <= end);
-  return {
-    main: entries.filter((w) => w.job === job).reduce((a, w) => a + Number(w.hours || 0), 0),
-    all: entries.reduce((a, w) => a + Number(w.hours || 0), 0),
-    days: new Set(entries.filter((w) => w.kind === 'workday').map((w) => w.date)).size,
-  };
-}
-
-// Save (or replace) the main job workday for a date. Returns an error message or null.
-function saveWorkday(date, startText, endText, note) {
-  const start = parseTime(startText), end = parseTime(endText);
-  if (!date || !Number.isFinite(start) || !Number.isFinite(end)) return 'Enter a start and finish time.';
-  if (end <= start) return 'The finish time must be after the start time.';
-  const job = state.workSettings.job;
-  const entry = { id: Date.now(), job, date, start: fmtTime(start), end: fmtTime(end), hours: Math.round((end - start) / 60 * 100) / 100, kind: 'workday' };
-  if (note) entry.description = note;
-  state.workEntries = state.workEntries.filter((w) => !(w.kind === 'workday' && w.date === date && w.job === job));
-  state.workEntries.push(entry);
-  persist();
-  render();
-  return null;
-}
-
-// Standard finish for a start time ("07:30" -> "15:30"), or '' if the start is not a time.
-function standardEnd(startText) {
-  const start = parseTime(startText);
-  return Number.isFinite(start) ? fmtTime(Math.min(start + state.workSettings.hoursPerDay * 60, 23 * 60 + 59)) : '';
-}
-let wdEndAuto = true; // finish time still follows the start time (user has not typed one)
-function suggestWorkdayEnd() {
-  if (wdEndAuto) document.getElementById('wdEnd').value = standardEnd(val('wdStart'));
-  renderWorkdayHint();
-}
-function renderWorkdayHint() {
-  const s = state.workSettings, start = parseTime(val('wdStart')), end = parseTime(val('wdEnd'));
-  if (document.activeElement && document.activeElement.id === 'wdEnd') wdEndAuto = false;
-  const parts = [];
-  if (Number.isFinite(start)) {
-    parts.push(`Standard finish ${fmtTime(start + s.hoursPerDay * 60)}`);
-    if (start < parseTime(s.earliestStart) || start > parseTime(s.latestStart)) parts.push(`⚠ outside your usual ${s.earliestStart} to ${s.latestStart} start`);
-    if (Number.isFinite(end) && end > start) {
-      const h = (end - start) / 60, diff = h - s.hoursPerDay;
-      parts.push(`${fmtHours(h)} worked${Math.abs(diff) >= 1 / 60 ? ` (${diff > 0 ? '+' : '−'}${fmtHours(Math.abs(diff))} vs ${s.hoursPerDay}h)` : ''}`);
-    }
-  }
-  if (workdayOn(val('wdDate'))) parts.push('replaces the workday already saved for this date');
-  setText('workdayHint', parts.join(' · '));
-}
-function submitWorkday(e) {
-  e.preventDefault();
-  const err = saveWorkday(val('wdDate'), val('wdStart'), val('wdEnd'), val('wdNote').trim());
-  if (err) { alert(err); return; }
-  ['wdStart', 'wdEnd', 'wdNote'].forEach((id) => (document.getElementById(id).value = ''));
-  wdEndAuto = true;
-  renderWorkdayHint();
-}
-
-function drawWorkChart() {
-  const weeks = Array.from({ length: 8 }, (_, i) => addDays(weekStartOf(today()), -7 * (7 - i)));
-  const totals = weeks.map(workWeekTotals), r1 = (x) => Math.round(x * 10) / 10;
-  const datasets = [{ label: state.workSettings.job + ' (h)', data: totals.map((t) => r1(t.main)), borderColor: '#21855c' }];
-  // Only show "all jobs" when other work exists, otherwise it just hides the main line
-  if (totals.some((t) => t.all > t.main)) datasets.push({ label: 'All jobs (h)', data: totals.map((t) => r1(t.all)), borderColor: '#e6a04d' });
-  datasets.push({ label: 'Target', data: weeks.map(() => state.workSettings.weeklyTarget), borderColor: '#b6c9bd', borderDash: [5, 5], pointRadius: 0 });
-  chart('workWeeksChart', 'line', weeks.map((w) => formatDate(w, { month: 'short', day: 'numeric' })), datasets);
 }
 
 // ---------- finance ----------
@@ -246,24 +157,6 @@ function renderModules() {
         <div class="module-copy"><b>${esc(t.title)}</b><small>${esc(t.category)}${t.due ? ' · Due ' + esc(t.due) : ''}</small></div>
         <button onclick="deleteChore(${Number(t.id)})" aria-label="Delete task">✕</button></div>`).join('')
     : '<p class="muted">No home tasks yet. Add cleaning, laundry or shopping above.</p>';
-
-  const ws = state.workSettings, week = workWeekTotals(weekStartOf(today()));
-  const left = ws.weeklyTarget - week.main;
-  document.getElementById('workStats').innerHTML =
-    moduleStat(esc(ws.job) + ' this week', `${fmtHours(week.main)} <small class="muted" style="font-size:13px">/ ${ws.weeklyTarget}h</small>`)
-    + moduleStat(left >= 0 ? 'Left to reach ' + ws.weeklyTarget + 'h' : 'Overtime this week', fmtHours(Math.abs(left)))
-    + moduleStat('All jobs this week', fmtHours(week.all));
-  setText('workdayRule', `Start ${ws.earliestStart} to ${ws.latestStart} · ${ws.hoursPerDay}h days`);
-  setText('workWeekPill', `This week ${fmtHours(week.main)} of ${ws.weeklyTarget}h`);
-  const wdDate = document.getElementById('wdDate');
-  if (!wdDate.value) wdDate.value = today();
-  wdDate.max = today();
-  document.getElementById('workList').innerHTML = state.workEntries.length
-    ? state.workEntries.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.start || '').localeCompare(a.start || '')).map((t) => `<div class="module-item">
-        <div class="module-copy"><b>${esc(t.job)} · ${fmtHours(Number(t.hours || 0))}${t.start ? ` <span class="muted" style="font-weight:600">${esc(t.start)} to ${esc(t.end)}</span>` : ''}${t.source === 'ai' ? ' <span class="pill">AI</span>' : ''}</b>
-          <small>${formatDate(t.date, { weekday: 'short', month: 'short', day: 'numeric' })}${t.description ? ' · ' + esc(t.description) : ''}</small></div>
-        <button onclick="deleteWork(${Number(t.id)})" aria-label="Delete work entry">✕</button></div>`).join('')
-    : '<p class="muted">No work logged yet.</p>';
 
   renderBalances();
   const month = today().slice(0, 7), monthEntries = state.financeEntries.filter((x) => x.date.startsWith(month));

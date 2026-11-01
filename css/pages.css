@@ -205,6 +205,18 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
 .balance-form{display:flex;gap:8px;margin-top:8px}
 .balance-form .field{flex:1;min-width:0}
 .pill.warn{background:#fff4e6;color:#a35a14}
+.project-tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.project-tabs button{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 15px;font-weight:750;color:#64756a;cursor:pointer;white-space:nowrap}
+.project-tabs button.active{background:var(--dark);border-color:var(--dark);color:#fff}
+.work-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+#workTaskForm #wtTitle{flex:3 1 220px}
+.task-progress{height:9px;border-radius:30px;background:#e8efeb;overflow:hidden;margin-bottom:6px}
+.task-progress i{display:block;height:100%;background:var(--green);border-radius:30px;transition:width .3s}
+.module-item.task .task-status{border:0;background:none;font-size:22px;line-height:1;color:#9aa69f;cursor:pointer;padding:0 2px;width:30px;flex-shrink:0}
+.module-item.task.doing .task-status{color:#e6a04d}
+.module-item.task.done .task-status{color:var(--green)}
+.module-item.task.done b{text-decoration:line-through;color:var(--muted)}
+.module-item.task.overdue small{color:#a35a14}
 .grocery-total{font-weight:750;text-align:right;margin-top:12px}
 .expense-row{margin:12px 0}
 .expense-row .expense-meta{display:flex;justify-content:space-between;font-size:12px}
@@ -235,6 +247,10 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
   .module-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .module-form{flex-direction:column}
   .balance-grid{grid-template-columns:1fr}
+  .work-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #workTaskForm #wtTitle,#workTaskForm .field{flex:none}
+  #projectHoursForm{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  #projectHoursForm .time-field:nth-child(n+3),#projectHoursForm .btn{grid-column:1/-1}
   .module-form .field{width:100%}
   .module-hero{padding:20px}
   #workdayForm{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}

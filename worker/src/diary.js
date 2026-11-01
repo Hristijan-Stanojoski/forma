@@ -66,7 +66,7 @@ export async function daySummary(env, date) {
 }
 
 // ---------- work ----------
-export const WORK_DEFAULTS = { job: 'Main job', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
+export const WORK_DEFAULTS = { job: 'Confect', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
 export async function workSettings(env) {
   return { ...WORK_DEFAULTS, ...(await getKey(env, 'workSettings', {})) };
 }

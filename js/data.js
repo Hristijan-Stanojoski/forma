@@ -69,13 +69,21 @@ const GYM_WEEKDAYS = [0, 1, 3, 4]; // Mon, Tue, Thu, Fri
 
 // Main job: start between earliestStart and latestStart, standard day hoursPerDay long.
 // Must match WORK_DEFAULTS in worker/src/diary.js. Editable in Settings (state.workSettings).
-const WORK_DEFAULTS = { job: 'Main job', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
+const WORK_DEFAULTS = { job: 'Confect', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
 // Money accounts: [key, name, currency, icon, how often it gets updated, starting balance on DIET_START]
 const ACCOUNTS = [
   ['upwork', 'Upwork', 'USD', '💼', 'Update weekly', 1466.02],
   ['bank', 'Bank account', 'EUR', '🏦', 'Updates when you withdraw from Upwork', 1182.73],
 ];
 const UPWORK_UPDATE_DAYS = 7;
+
+// Work projects, shown as a dropdown under Work in the menu. Must match PROJECTS in worker/src/life.js.
+// Confect is the employer (workdays with start and finish times); the others are personal projects.
+const PROJECTS = [
+  { key: 'confect', name: 'Confect', icon: '🏢', intro: 'Your job. Log each workday with its start and finish time, keep track of tasks and your weekly hours.' },
+  { key: 'feedora', name: 'Feedora', icon: '🍲', intro: 'Your personal project. Plan the tasks, tick them off and log the hours you put in.' },
+  { key: 'travelhub', name: 'travelhub.mk', icon: '✈️', intro: 'Your personal project. Plan the tasks, tick them off and log the hours you put in.' },
+];
 
 const WORK_WEEKDAYS = [0, 1, 2, 3, 4]; // Mon to Fri
 

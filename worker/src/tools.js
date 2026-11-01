@@ -199,6 +199,7 @@ export async function callTool(env, name, a = {}) {
       const job = a.job ? String(a.job).slice(0, 80) : settings.job;
       const hours = Math.round((end - start) / 60 * 100) / 100;
       const entry = { id: Date.now(), job, date, start: fmtTime(start), end: fmtTime(end), hours, kind: 'workday', source: 'ai' };
+      if (job === settings.job) entry.project = 'confect';
       if (a.note) entry.description = String(a.note).slice(0, 200);
       // One workday per date and job: logging again corrects it
       const entries = (await getKey(env, 'workEntries', [])).filter((w) => !(w.kind === 'workday' && w.date === date && w.job === job));

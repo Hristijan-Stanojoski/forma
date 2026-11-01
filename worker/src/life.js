@@ -10,6 +10,26 @@ const FIN_CATS = ['Groceries', 'Dining', 'Housing', 'Transport', 'Utilities', 'H
 const MEAL_NAMES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Drinks'];
 // Must match ACCOUNTS in js/data.js: [key, name, currency, starting balance on DIET_START]
 const ACCOUNTS = [['upwork', 'Upwork', 'USD', 1466.02], ['bank', 'Bank account', 'EUR', 1182.73]];
+// Must match PROJECTS in js/data.js: [key, name]. Confect is the employer (workdays via log_workday).
+const PROJECTS = [['confect', 'Confect'], ['feedora', 'Feedora'], ['travelhub', 'travelhub.mk']];
+const TASK_STATUSES = ['todo', 'doing', 'done'];
+const plainName = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+// Accepts a key or a name ("travelhub", "TravelHub.mk", "Feedora"); null when it is not a project.
+function projectKey(v) {
+  const n = plainName(v);
+  const p = PROJECTS.find(([key, name]) => key === n || plainName(name) === n);
+  return p ? p[0] : null;
+}
+function requireProject(v) {
+  const key = projectKey(v);
+  if (!key) throw new Error('project must be one of: ' + PROJECTS.map(([, n]) => n).join(', '));
+  return key;
+}
+const projectName = (key) => (PROJECTS.find(([k]) => k === key) || [key, key])[1];
+function entryProject(w, mainJob) {
+  if (w.project) return w.project;
+  return w.job === mainJob ? 'confect' : projectKey(w.job);
+}
 
 const r2 = (x) => Math.round(x * 100) / 100;
 function amount(v, name, { min = 0, max = 10000000 } = {}) {
@@ -98,10 +118,26 @@ export const LIFE_TOOLS = [
   { name: 'list_events', title: 'List schedule plans', description: 'Plans between two dates (default: today plus the next 7 days).',
     inputSchema: obj({ from: dateProp, to: dateProp }), annotations: readOnly },
 
-  // ----- extra work -----
-  { name: 'log_work', title: 'Log hours for another job',
-    description: 'Log hours worked for a side job or client (not the main job: use log_workday for that). Example: 3 hours of Upwork client work.',
-    inputSchema: obj({ date: dateProp, job: { type: 'string' }, hours: { type: 'number' }, description: { type: 'string' } }, ['job', 'hours']) },
+  // ----- work projects and extra work -----
+  { name: 'log_work', title: 'Log hours on a project or other job',
+    description: 'Log hours worked on a personal project (project: feedora or travelhub, optionally task_id from list_work_tasks) or for another job or client (job). Not for Confect workdays: use log_workday for those. Example: 2 hours on Feedora.',
+    inputSchema: obj({ date: dateProp, project: { type: 'string', enum: ['feedora', 'travelhub', 'confect'] }, job: { type: 'string', description: 'Only for work outside the projects' },
+      hours: { type: 'number' }, task_id: idProp, description: { type: 'string' } }, ['hours']) },
+  { name: 'add_work_task', title: 'Add work tasks',
+    description: 'Add one or more tasks to a work project: confect (his job), feedora or travelhub (travelhub.mk). Optional due date and status (todo, doing, done).',
+    inputSchema: obj({ project: { type: 'string', enum: ['confect', 'feedora', 'travelhub'] },
+      tasks: { type: 'array', items: obj({ title: { type: 'string' }, due: dateProp, status: { type: 'string', enum: TASK_STATUSES } }, ['title']) } }, ['project', 'tasks']) },
+  { name: 'update_work_task', title: 'Update a work task',
+    description: 'Change a work task: status (todo, doing = in progress, done), title, due date or project. Ids come from list_work_tasks.',
+    inputSchema: obj({ id: idProp, status: { type: 'string', enum: TASK_STATUSES }, title: { type: 'string' }, due: { type: 'string', description: 'YYYY-MM-DD, or empty to clear' },
+      project: { type: 'string', enum: ['confect', 'feedora', 'travelhub'] } }, ['id']) },
+  { name: 'delete_work_task', title: 'Delete a work task', description: 'Remove a work task. Confirm first.', inputSchema: obj({ id: idProp }, ['id']), annotations: destructive },
+  { name: 'list_work_tasks', title: 'List work tasks',
+    description: 'Tasks for one project (or all), open ones first, with hours logged per task and progress.',
+    inputSchema: obj({ project: { type: 'string', enum: ['confect', 'feedora', 'travelhub'] }, include_done: { type: 'boolean' } }), annotations: readOnly },
+  { name: 'get_project', title: 'Project overview',
+    description: 'Hours this week, this month and all time, task progress and recent entries for a work project.',
+    inputSchema: obj({ project: { type: 'string', enum: ['confect', 'feedora', 'travelhub'] } }, ['project']), annotations: readOnly },
   { name: 'delete_work', title: 'Delete a work entry', description: 'Remove a work entry (workday or other job) by id. Ids come from get_work_week. Confirm first.',
     inputSchema: obj({ id: idProp }, ['id']), annotations: destructive },
 
@@ -266,11 +302,79 @@ export async function callLifeTool(env, name, a) {
     }
 
     case 'log_work': {
-      if (!a.job) throw new Error('job is required');
-      const entry = { id: numId(), job: text(a.job, 80), date: resolveDate(env, a.date), hours: amount(a.hours, 'hours', { min: 0.1, max: 24 }), source: 'ai' };
+      const project = a.project ? requireProject(a.project) : projectKey(a.job);
+      if (!project && !a.job) throw new Error('Send project (feedora or travelhub) or job');
+      const entry = { id: numId(), job: project ? projectName(project) : text(a.job, 80), date: resolveDate(env, a.date), hours: amount(a.hours, 'hours', { min: 0.1, max: 24 }), source: 'ai' };
+      if (project) entry.project = project;
+      if (a.task_id !== undefined && a.task_id !== null && a.task_id !== '') {
+        const task = findById(await getKey(env, 'workTasks', []), a.task_id, 'work task', 'list_work_tasks');
+        entry.taskId = task.id;
+      }
       if (a.description) entry.description = text(a.description, 200);
       await saveList(env, 'workEntries', [...(await getKey(env, 'workEntries', [])), entry]);
-      return { logged: entry };
+      return { logged: entry, note: project === 'confect' ? 'For Confect workdays with start and finish times, log_workday is usually better.' : undefined };
+    }
+
+    case 'add_work_task': {
+      const project = requireProject(a.project);
+      if (!Array.isArray(a.tasks) || !a.tasks.length) throw new Error('tasks is required');
+      const today = todayIn(env);
+      const added = a.tasks.map((t) => {
+        if (!t.title) throw new Error('each task needs a title');
+        const status = TASK_STATUSES.includes(t.status) ? t.status : 'todo';
+        const task = { id: numId(), project, title: text(t.title, 140), status, due: t.due ? resolveDate(env, t.due) : '', createdAt: today };
+        if (status === 'done') task.doneAt = today;
+        return task;
+      });
+      const list = await saveList(env, 'workTasks', [...(await getKey(env, 'workTasks', [])), ...added]);
+      const mine = list.filter((t) => t.project === project);
+      return { added, project: projectName(project), open: mine.filter((t) => t.status !== 'done').length, done: mine.filter((t) => t.status === 'done').length };
+    }
+    case 'update_work_task': {
+      const list = await getKey(env, 'workTasks', []);
+      const t = findById(list, a.id, 'work task', 'list_work_tasks');
+      if (a.status !== undefined) {
+        if (!TASK_STATUSES.includes(a.status)) throw new Error('status must be todo, doing or done');
+        t.status = a.status;
+        if (t.status === 'done') t.doneAt = todayIn(env); else delete t.doneAt;
+      }
+      if (a.title) t.title = text(a.title, 140);
+      if (a.due !== undefined) t.due = a.due ? resolveDate(env, a.due) : '';
+      if (a.project) t.project = requireProject(a.project);
+      await saveList(env, 'workTasks', list);
+      return { task: t };
+    }
+    case 'delete_work_task': {
+      const list = await getKey(env, 'workTasks', []);
+      const t = findById(list, a.id, 'work task', 'list_work_tasks');
+      await saveList(env, 'workTasks', without(list, a.id));
+      return { deleted: t };
+    }
+    case 'list_work_tasks':
+    case 'get_project': {
+      const rows = await getKeys(env, ['workTasks', 'workEntries', 'workSettings']);
+      const mainJob = (rows.workSettings || {}).job || 'Confect';
+      const project = a.project ? requireProject(a.project) : null;
+      const tasks = (rows.workTasks || []).filter((t) => !project || t.project === project);
+      const entries = (rows.workEntries || []).filter((w) => project ? entryProject(w, mainJob) === project : !!entryProject(w, mainJob));
+      const hoursByTask = {};
+      for (const w of entries) if (w.taskId) hoursByTask[w.taskId] = r2((hoursByTask[w.taskId] || 0) + Number(w.hours || 0));
+      const order = { doing: 0, todo: 1, done: 2 };
+      const shown = tasks.filter((t) => a.include_done || name === 'get_project' || t.status !== 'done')
+        .sort((x, y) => order[x.status] - order[y.status] || (x.due || '9').localeCompare(y.due || '9'))
+        .map((t) => ({ ...t, project_name: projectName(t.project), hours_logged: hoursByTask[t.id] || 0 }));
+      const done = tasks.filter((t) => t.status === 'done').length;
+      const progress = { total: tasks.length, done, in_progress: tasks.filter((t) => t.status === 'doing').length, todo: tasks.filter((t) => t.status === 'todo').length,
+        percent_done: tasks.length ? Math.round(done / tasks.length * 100) : 0 };
+      if (name === 'list_work_tasks') return { project: project ? projectName(project) : 'all projects', progress, tasks: shown };
+      const today = todayIn(env), ws = weekStart(today), month = today.slice(0, 7);
+      const sum = (list) => r2(list.reduce((s, w) => s + Number(w.hours || 0), 0));
+      return {
+        project: projectName(project), kind: project === 'confect' ? 'employer' : 'personal project',
+        hours: { this_week: sum(entries.filter((w) => w.date >= ws && w.date <= addDays(ws, 6))), this_month: sum(entries.filter((w) => w.date.startsWith(month))), all_time: sum(entries) },
+        progress, tasks: shown,
+        recent_entries: entries.slice().sort((x, y) => y.date.localeCompare(x.date)).slice(0, 10),
+      };
     }
     case 'delete_work': {
       const list = await getKey(env, 'workEntries', []);

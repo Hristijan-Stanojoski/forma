@@ -9,6 +9,8 @@ const INSTRUCTIONS =
   'When the user describes what they ate or drank, estimate calories and macros yourself and call log_food. ' +
   'Dates are Europe/Skopje local time. Always report what you logged and the remaining calories for the day. ' +
   'When the user says when they started and finished work, call log_workday and report the day\'s hours and the week total. ' +
+  'Work has three projects: Confect (his job, logged with log_workday), and his personal projects Feedora and travelhub.mk ' +
+  '(log hours with log_work and project, manage their tasks with add_work_task, update_work_task and list_work_tasks; get_project shows hours and progress). ' +
   'Everything else in the app can be logged too: body measurements, the daily checklist, gym sessions, home tasks, schedule plans, side job hours, ' +
   'spending and income (EUR; pass currency MKD for denars), Upwork and bank balances, the grocery list and food favorites. ' +
   'Whenever the user mentions any of these, use the matching tool instead of asking them to enter it manually, then confirm what changed.';

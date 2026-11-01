@@ -24,6 +24,7 @@ function dayInfo(date) {
     tasks, events: state.events.filter((e) => e.date === date).sort((a, b) => (a.time || '99').localeCompare(b.time || '99')),
     work, workHours: work.reduce((a, w) => a + Number(w.hours || 0), 0),
     isWorkday: WORK_WEEKDAYS.includes(weekdayIndex(date)), workday: workdayOn(date),
+    workTasks: state.workTasks.filter((t) => (t.status === 'done' ? t.doneAt === date : t.due === date)),
     money: state.financeEntries.filter((x) => x.date === date),
     balances: ACCOUNTS.flatMap(([key]) => state.balances[key].filter((b) => b.date === date && b.kind !== 'start').map((b) => ({ ...b, account: key }))),
     foods, food: sumFoods(foods), complete: !!state.completedDays[date],
@@ -214,6 +215,8 @@ function dayDetailHTML(info) {
         </form>` : '';
     sections.push(`<div class="detail-block"><h4>💼 Work${info.workHours ? ' · ' + fmtHours(info.workHours) : ''}</h4>${list}${expected}${quick}</div>`);
   }
+  if (info.workTasks.length) sections.push(`<div class="detail-block"><h4>✅ Work tasks</h4>
+      <ul class="plain">${info.workTasks.map((t) => `<li>${t.status === 'done' ? '✓ ' : ''}<b>${escapeHTML(projectInfo(t.project).name)}</b> · ${escapeHTML(t.title)}${t.status === 'done' ? ' <span class="muted">done</span>' : ''}</li>`).join('')}</ul></div>`);
   if (info.balances.length) sections.push(`<div class="detail-block"><h4>🏦 Balances</h4>
       <ul class="plain">${info.balances.map((b) => `<li>${balanceLabel(b)}</li>`).join('')}</ul></div>`);
   if (info.money.length) sections.push(`<div class="detail-block"><h4>💳 Money</h4>
