@@ -4,6 +4,7 @@
 let nutritionDate = today();   // day shown on the Nutrition page
 let editingFoodId = null;      // entry currently open for inline editing
 let recentFoods = [];          // last rendered "Recent" list, so chips can refer to it by index
+const openMealGroups = new Set(); // meal groups expanded in the entries list (collapsed by default)
 
 const dayFoods = () => state.foods[nutritionDate] || [];
 const isViewingToday = () => nutritionDate === today();
@@ -116,10 +117,17 @@ function renderFoodList() {
   groups.set('Drinks', list.filter((f) => f.meal === 'Drinks'));
   const filled = [...groups].filter(([, items]) => items.length);
   box.innerHTML = filled.length
-    ? filled.map(([group, items]) => `<div class="diary-group">
-        <div class="diary-group-head"><b>${escapeHTML(MEAL_LABELS[group] || group)}</b><strong>${Math.round(sumFoods(items).cal)} kcal</strong></div>
-        ${items.map((f) => (f.id === editingFoodId ? editFormHTML(f) : entryHTML(f))).join('')}
-      </div>`).join('')
+    ? filled.map(([group, items]) => {
+        const sum = sumFoods(items);
+        const open = openMealGroups.has(group) || items.some((f) => f.id === editingFoodId);
+        return `<details class="diary-group meal-group" data-group="${escapeHTML(group)}" ${open ? 'open' : ''} ontoggle="toggleMealGroup(this)">
+          <summary class="diary-group-head">
+            <span class="meal-group-title"><b>${escapeHTML(MEAL_LABELS[group] || group)}</b><small>${items.length} item${items.length === 1 ? '' : 's'} · ${sum.p.toFixed(1)}g protein</small></span>
+            <strong>${Math.round(sum.cal)} kcal</strong><span class="chevron" aria-hidden="true">›</span>
+          </summary>
+          ${items.map((f) => (f.id === editingFoodId ? editFormHTML(f) : entryHTML(f))).join('')}
+        </details>`;
+      }).join('')
     : `<div class="diary-empty">Nothing logged for ${isViewingToday() ? 'today' : dayLabel(nutritionDate)} yet. Use the form or a quick add above.</div>`;
 
   if (draft) fillEditForm(draft);
@@ -173,6 +181,10 @@ function fillEditForm(draft) {
   for (const [id, value] of Object.entries(draft)) { const el = document.getElementById(id); if (el) el.value = value; }
 }
 
+function toggleMealGroup(el) {
+  if (el.open) openMealGroups.add(el.dataset.group); else openMealGroups.delete(el.dataset.group);
+}
+
 // ---------- editing ----------
 function startEditFood(id) {
   editingFoodId = id;
@@ -193,6 +205,7 @@ function saveFoodEdit() {
   f.name = d.editName.trim();
   if (d.editQty.trim()) f.qty = d.editQty.trim(); else delete f.qty;
   f.meal = d.editMeal;
+  openMealGroups.add(f.meal);
   [f.cal, f.p, f.c, f.fat] = nums;
   editingFoodId = null;
   persist();
@@ -216,6 +229,7 @@ function addFood(preset) {
   if (!f.qty) delete f.qty;
   f.id = newFoodId();
   (state.foods[nutritionDate] ??= []).push(f);
+  openMealGroups.add(f.meal); // show where it landed
   persist();
   if (!preset) FOOD_FIELDS.forEach((id) => (document.getElementById(id).value = ''));
   render();
