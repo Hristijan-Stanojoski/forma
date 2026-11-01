@@ -32,6 +32,8 @@ function applyDefaults(st) {
   st.financeEntries ??= [];
   st.groceryItems ??= [];
   st.favorites ??= DEFAULT_FAVORITES.map((f) => ({ ...f }));
+  st.events ??= [];        // schedule plans: {id, date, title, time?, done}
+  st.workoutsDone ??= {};  // date -> true when that day's gym session is done
   st.targets ??= {};
   st.targets.protein ??= 140;
   st.targets.water ??= 2.5;

@@ -12,6 +12,7 @@ Goal: 100 kg → 80 kg on a Modified UN diet (4 day rotation starting 2026-11-01
   - `persist()` saves locally and schedules a cloud sync. Always call it after changing `state`, then `render()`.
   - Cloud sync (`js/sync.js`, `syncNow`): pulls `/api/state`, three way merges changed keys (`merge3`) against the last synced snapshot (`forma-sync-base`), PUTs only changed keys. Polls every 20 s and on tab focus.
   - Food entries are addressed by `id`, never by array index (a sync can reorder lists).
+  - Schedule page (`js/schedule.js`): day/week/month views built from `dayInfo(date)`, which gathers diet day, workout, home tasks (by `due`, or `doneAt` when ticked), `state.events` (plans), `state.workoutsDone`, work, money, food and weigh ins. Any new per day data should be added to `dayInfo` so it shows up there.
   - Nutrition page works on any past day: `nutritionDate` (UI only, not saved) selects the day; add, edit, delete, water and "complete" all apply to it. `state.favorites` (synced) holds quick add foods; default ones have fixed ids (`fav-*`) so devices do not duplicate them.
   - Charts are a tiny built in canvas renderer (`js/chart.js`), no external libraries. Keep it dependency free.
   - Pages: dashboard, nutrition, training, progress, schedule, chores, work, finance, settings (`PAGES` array + `go(page)` in `js/app.js`).

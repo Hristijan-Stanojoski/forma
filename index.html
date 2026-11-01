@@ -280,8 +280,25 @@
 
     <!-- ===================== Schedule ===================== -->
     <section class="page" id="schedule">
-      <div class="sectionhead"><h3>This week's plan</h3><span class="pill">4 gym days</span></div>
-      <div class="days" id="weekDays"></div>
+      <div class="sectionhead">
+        <h3>Your plan</h3>
+        <div class="schedule-tools">
+          <div class="view-switch" role="group" aria-label="Calendar view">
+            <button type="button" data-view="day" onclick="setScheduleView('day')" title="Day view" aria-label="Day view"><svg viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="11.5" rx="2"/><path d="M2 6h12M5 9h6M5 11.5h4"/></svg></button>
+            <button type="button" data-view="week" onclick="setScheduleView('week')" title="Week view" aria-label="Week view"><svg viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="11.5" rx="2"/><path d="M2 6h12M5 6v8M8 6v8M11 6v8"/></svg></button>
+            <button type="button" data-view="month" onclick="setScheduleView('month')" title="Month view" aria-label="Month view"><svg viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="11.5" rx="2"/><path d="M2 6h12M2 10h12M6 6v8M10 6v8"/></svg></button>
+          </div>
+          <span class="pill">4 gym days</span>
+        </div>
+      </div>
+      <div class="daybar">
+        <button class="btn outline" type="button" onclick="shiftSchedule(-1)" aria-label="Previous">◀</button>
+        <b class="period-label" id="schedulePeriod"></b>
+        <button class="btn outline" type="button" onclick="shiftSchedule(1)" aria-label="Next">▶</button>
+        <button class="btn secondary" type="button" id="scheduleTodayBtn" onclick="selectScheduleDay(today())">Today</button>
+      </div>
+      <div id="scheduleGrid"></div>
+      <div id="scheduleDetail"></div>
       <div class="sectionhead"><h3>Four day diet cycle</h3></div>
       <div class="workouts" id="dietCycle"></div>
       <p class="note">The cycle started on November 1, 2026 as Day 1.</p>

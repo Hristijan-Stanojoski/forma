@@ -37,6 +37,7 @@ function render() {
   renderNutrition();
   renderProgress();
   renderModules();
+  renderSchedule();
   fillTargets();
   drawCharts();
 }
@@ -52,7 +53,6 @@ function drawCharts() {
 buildNav();
 renderMealIdeas();
 renderTraining();
-renderSchedule();
 document.getElementById('workDate').value = today();
 if (!cloud() && !(state.foods[NOV1_DATE] || []).length) importNov1();
 
@@ -73,8 +73,8 @@ let renderedDay = today();
 setInterval(() => {
   if (today() === renderedDay) return;
   if (nutritionDate === renderedDay) nutritionDate = today(); // keep following "today"
+  if (scheduleDate === renderedDay) scheduleDate = today();
   renderedDay = today();
-  renderSchedule();
   render();
 }, 60000);
 

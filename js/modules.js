@@ -12,18 +12,21 @@ function addChore(e) {
   state.homeTasks.push({ id: Date.now(), title, category: val('choreCategory'), due: val('choreDue'), done: false });
   persist();
   e.target.reset();
-  renderModules();
+  render();
 }
 function toggleChore(id, done) {
   const t = state.homeTasks.find((x) => x.id === id);
-  if (t) t.done = done;
+  if (t) {
+    t.done = done;
+    if (done) t.doneAt = today(); else delete t.doneAt; // lets the schedule show what was done on which day
+  }
   persist();
-  renderModules();
+  render();
 }
 function deleteChore(id) {
   state.homeTasks = state.homeTasks.filter((x) => x.id !== id);
   persist();
-  renderModules();
+  render();
 }
 
 // ---------- work ----------
@@ -35,12 +38,12 @@ function addWork(e) {
   persist();
   e.target.reset();
   document.getElementById('workDate').value = today();
-  renderModules();
+  render();
 }
 function deleteWork(id) {
   state.workEntries = state.workEntries.filter((x) => x.id !== id);
   persist();
-  renderModules();
+  render();
 }
 
 // ---------- finance ----------
@@ -51,12 +54,12 @@ function addTransaction(e) {
   state.financeEntries.push({ id: Date.now(), date: today(), type: val('transactionType'), amount, category: val('transactionCategory'), note: val('transactionNote').trim() });
   persist();
   e.target.reset();
-  renderModules();
+  render();
 }
 function deleteTransaction(id) {
   state.financeEntries = state.financeEntries.filter((x) => x.id !== id);
   persist();
-  renderModules();
+  render();
 }
 function addGrocery(e) {
   e.preventDefault();
@@ -65,18 +68,18 @@ function addGrocery(e) {
   state.groceryItems.push({ id: Date.now(), name, qty: val('groceryQty').trim(), price, done: false });
   persist();
   e.target.reset();
-  renderModules();
+  render();
 }
 function toggleGrocery(id, done) {
   const t = state.groceryItems.find((x) => x.id === id);
   if (t) t.done = done;
   persist();
-  renderModules();
+  render();
 }
 function deleteGrocery(id) {
   state.groceryItems = state.groceryItems.filter((x) => x.id !== id);
   persist();
-  renderModules();
+  render();
 }
 
 function renderModules() {

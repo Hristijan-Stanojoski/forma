@@ -73,11 +73,66 @@
 /* Training and schedule */
 .workouts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .workouts .card h3{margin-top:0}
-.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
-.day{padding:14px 7px;border:1px solid var(--line);border-radius:12px;background:white;text-align:center}
-.day strong{display:block}
-.day small{color:var(--muted)}
-.day.today{border:2px solid var(--green);background:var(--light)}
+
+/* Schedule: header tools and navigation */
+.schedule-tools{display:flex;align-items:center;gap:10px}
+.view-switch{display:inline-flex;background:white;border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.view-switch button{border:0;background:transparent;width:34px;height:30px;border-radius:7px;display:grid;place-items:center;color:#7a8980}
+.view-switch button.active{background:var(--light);color:var(--green)}
+.view-switch svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
+.period-label{flex:0 1 auto;min-width:150px;text-align:center;font-size:15px}
+
+/* Schedule: week cards */
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.sched-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 6px;border:1px solid var(--line);border-radius:13px;background:white;text-align:center;min-width:0;color:var(--text)}
+.sched-day:hover{border-color:#bcd9c7}
+.sched-day small{color:var(--muted);font-size:11px}
+.sched-day.past{background:#fafcfb}
+.sched-day.today{border:2px solid var(--green);background:var(--light)}
+.sched-day.selected{box-shadow:0 0 0 3px #22875f33;border-color:var(--green)}
+.sd-icons{display:flex;gap:6px;font-size:18px;margin-top:6px}
+.sd-icons .tick,.md-num .tick{font-style:normal;font-size:10px;font-weight:800;color:var(--green);vertical-align:top}
+.sd-label{min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.sd-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;min-height:20px}
+.sd-badges span{font-size:10px;font-weight:700;background:#f1f6f3;border-radius:99px;padding:2px 6px;white-space:nowrap}
+.sd-food{font-weight:700}
+.sd-food.ok{color:var(--green)!important}
+
+/* Schedule: month grid */
+.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.month-head{text-align:center;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;padding-bottom:3px}
+.month-day{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:78px;padding:7px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--text);text-align:left;min-width:0;overflow:hidden}
+.month-day:hover{border-color:#bcd9c7}
+.month-day.other-month{opacity:.4}
+.month-day.today{border:2px solid var(--green);background:var(--light)}
+.month-day.selected{box-shadow:0 0 0 3px #22875f33;border-color:var(--green)}
+.md-num{font-weight:800;font-size:13px}
+.md-diet{font-size:13px}
+.md-icons{font-size:12px;letter-spacing:1px;overflow:hidden;white-space:nowrap;max-width:100%}
+.md-icons .tick{font-weight:400;background:#d9f0e2;border-radius:4px}
+
+/* Schedule: day detail */
+.day-detail{margin-top:16px}
+.day-detail-head{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap}
+.day-detail-head h2{margin:4px 0 0;font-size:23px;letter-spacing:-.6px}
+.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.detail-block{background:#f6f9f7;border-radius:13px;padding:13px 15px;min-width:0}
+.detail-block h4{margin:0 0 6px;font-size:14px}
+.detail-block p{margin:3px 0}
+.detail-block ul{margin:6px 0 0;padding-left:18px}
+.detail-block ul.plain{list-style:none;padding:0}
+.detail-block li{margin:3px 0}
+.detail-block li small{color:var(--muted)}
+details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size:13px}
+.check-list{display:grid;gap:4px}
+.check-line{display:flex;align-items:center;gap:9px;margin-top:6px;font-size:13px}
+.check-line input{width:17px;height:17px;accent-color:var(--green);flex-shrink:0}
+.check-line>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.check-line small{color:var(--muted)}
+.check-line.done>span{text-decoration:line-through;opacity:.55}
+.check-line .x{border:0;background:transparent;color:#bd6b64;padding:4px 6px}
+.detail-add{margin-top:14px}
+.detail-add #schedTitle{flex:3 1 220px}
 
 /* Progress */
 .measure-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
@@ -129,7 +184,13 @@
   .macro-row>.btn{flex-basis:100%}
   .food-actions button{width:36px;height:36px}
   .workouts{grid-template-columns:1fr}
-  .days{grid-template-columns:repeat(4,1fr)}
+  .week-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .month-grid{gap:3px}
+  .month-day{min-height:58px;padding:4px;border-radius:8px}
+  .md-num{font-size:12px}
+  .md-diet,.md-icons{font-size:10px;letter-spacing:0}
+  .detail-grid{grid-template-columns:1fr}
+  .period-label{min-width:0;flex:1}
   .measure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .measure-form{grid-template-columns:repeat(2,minmax(0,1fr))}
   .adaptive{grid-template-columns:1fr}
