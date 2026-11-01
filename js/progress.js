@@ -88,6 +88,7 @@ function renderMeasurements() {
   setText('measurementStatus', m.length
     ? `Last measurement: ${m[m.length - 1].date} · ${m.length} weekly record(s)`
     : 'No measurements recorded yet. Your first entry sets the baseline.');
+  renderMeasurementTable();
   const dateInput = document.getElementById('measurementDate');
   if (!dateInput.value) dateInput.value = today();
   dateInput.max = today();
@@ -105,6 +106,56 @@ function renderMeasurements() {
       data: dates.map((d) => (first && d >= first.date && lookup.has(d) ? Number(((lookup.get(d) - first.value) / first.value * 100).toFixed(2)) : null)),
     };
   }));
+}
+
+// Weight on a date: that day's weigh in, else the latest one before it, else the start weight.
+function weightOn(date) {
+  let value = PROFILE.startWeight;
+  for (const x of state.weights) if (x.date <= date) value = x.value;
+  return value;
+}
+
+function renderMeasurementTable() {
+  const box = document.getElementById('measurementTable');
+  const rows = state.measurements.map((m) => ({ ...m, weight: weightOn(m.date) }));
+  if (!rows.length) { box.innerHTML = ''; return; }
+  const cols = [['weight', 'Weight', 'kg'], ...MEASURE_FIELDS.map(([field, , , label]) => [field, label, 'cm'])];
+  // Weight and belly should go down, arms should grow; colour each change by that.
+  const growthIsGood = new Set(['left', 'right']);
+  const change = (d, field, unit) => {
+    if (d === null || Math.abs(d) < 0.05) return d === null ? '' : '<small>no change</small>';
+    const good = growthIsGood.has(field) ? d > 0 : d < 0;
+    return `<small class="${good ? 'good' : 'bad'}">${d < 0 ? '▼' : '▲'} ${Math.abs(d).toFixed(1)} ${unit}</small>`;
+  };
+  // Change is measured against the previous check in that has the same field.
+  const prev = {};
+  const body = rows.map((r) => {
+    const cells = cols.map(([field, , unit]) => {
+      if (!Number.isFinite(r[field])) return '<td>—</td>';
+      const d = prev[field] !== undefined ? r[field] - prev[field] : null;
+      prev[field] = r[field];
+      return `<td><b>${r[field].toFixed(1)}</b> ${unit}${change(d, field, unit)}</td>`;
+    });
+    return `<tr><td>${formatDate(r.date, r.date.slice(0, 4) === today().slice(0, 4) ? { month: 'short', day: 'numeric' } : undefined)}</td>${cells.join('')}<td><button class="del" title="Delete this check in" onclick="deleteMeasurement('${r.date}')">×</button></td></tr>`;
+  }).reverse().join('');
+  const total = cols.map(([field, , unit]) => {
+    const vals = rows.filter((r) => Number.isFinite(r[field]));
+    if (vals.length < 2) return '<td>—</td>';
+    const d = vals[vals.length - 1][field] - vals[0][field];
+    return `<td>${d > 0 ? '+' : ''}${d.toFixed(1)} ${unit}</td>`;
+  }).join('');
+  box.innerHTML = `<table class="measure-table">
+    <thead><tr><th>Date</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${body}</tbody>
+    ${rows.length > 1 ? `<tfoot><tr><td>Total change</td>${total}<td></td></tr></tfoot>` : ''}
+  </table>`;
+}
+
+function deleteMeasurement(date) {
+  if (!confirm(`Delete the measurements from ${formatDate(date)}?`)) return;
+  state.measurements = state.measurements.filter((m) => m.date !== date);
+  persist();
+  render();
 }
 
 function drawWeightCharts() {

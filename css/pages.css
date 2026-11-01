@@ -154,6 +154,19 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
 .measure-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .measure-form label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#697870}
 .measure-form input{width:100%}
+.measure-table-wrap{margin-top:14px;overflow-x:auto}
+.measure-table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+.measure-table th{text-align:left;font-size:11px;font-weight:700;color:#78877f;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid #e3ebe6}
+.measure-table td{padding:9px 10px;border-bottom:1px solid #eef3f0;vertical-align:top}
+.measure-table td b{font-weight:700}
+.measure-table td small{display:block;font-size:11px;color:#9aa69f}
+.measure-table td small.good{color:var(--green)}
+.measure-table td small.bad{color:#c4703a}
+.measure-table tfoot td{border-bottom:0;background:#f5f8f6;font-weight:700}
+.measure-table tfoot td:first-child{border-radius:10px 0 0 10px}
+.measure-table tfoot td:last-child{border-radius:0 10px 10px 0}
+.measure-table .del{border:0;background:none;color:#a0aca5;cursor:pointer;font-size:15px;padding:0 4px}
+.measure-table .del:hover{color:#c0392b}
 .measure-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#64756a}
 .measure-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px}
 .adaptive{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
