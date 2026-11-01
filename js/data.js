@@ -66,6 +66,11 @@ const WORKOUTS = [
 ];
 const GYM_WEEKDAYS = [0, 1, 3, 4]; // Mon, Tue, Thu, Fri
 
+// Main job: start between earliestStart and latestStart, standard day hoursPerDay long.
+// Must match WORK_DEFAULTS in worker/src/diary.js. Editable in Settings (state.workSettings).
+const WORK_DEFAULTS = { job: 'Main job', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
+const WORK_WEEKDAYS = [0, 1, 2, 3, 4]; // Mon to Fri
+
 // November 1 verified user provided intake. The salmon bowl is stored ingredient by ingredient.
 const NOV1_DATE = '2026-11-01';
 const NOV1_ITEMS = [

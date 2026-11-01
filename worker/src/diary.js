@@ -65,6 +65,43 @@ export async function daySummary(env, date) {
   };
 }
 
+// ---------- work ----------
+export const WORK_DEFAULTS = { job: 'Main job', hoursPerDay: 8, earliestStart: '07:00', latestStart: '09:00', weeklyTarget: 40 };
+export async function workSettings(env) {
+  return { ...WORK_DEFAULTS, ...(await getKey(env, 'workSettings', {})) };
+}
+
+// Accepts "07:30", "7:30", "7", "7:30am", "3:30 pm". Returns minutes after midnight.
+export function parseTime(v, name) {
+  const m = /^(\d{1,2})(?::|\.|h)?(\d{2})?\s*(am|pm)?$/i.exec(String(v ?? '').trim());
+  let h = m ? Number(m[1]) : NaN;
+  const min = m && m[2] ? Number(m[2]) : 0;
+  if (m && m[3]) { const pm = m[3].toLowerCase() === 'pm'; if (h === 12) h = pm ? 12 : 0; else if (pm) h += 12; }
+  if (!m || h > 23 || min > 59) throw new Error(`${name} must be a time like "07:30" (24 hour)`);
+  return h * 60 + min;
+}
+export const fmtTime = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+export function weekStart(date) {
+  const day = (new Date(date + 'T12:00:00Z').getUTCDay() + 6) % 7; // Mon = 0
+  return addDays(date, -day);
+}
+
+// Hours for the Monday to Sunday week containing `date`.
+export async function workWeek(env, date) {
+  const settings = await workSettings(env);
+  const start = weekStart(date), end = addDays(start, 6);
+  const entries = (await getKey(env, 'workEntries', [])).filter((w) => w.date >= start && w.date <= end);
+  const main = entries.filter((w) => w.job === settings.job).reduce((a, w) => a + Number(w.hours || 0), 0);
+  const total = entries.reduce((a, w) => a + Number(w.hours || 0), 0);
+  return {
+    week: `${start} to ${end}`, main_job: settings.job,
+    main_job_hours: r2(main), target_hours: settings.weeklyTarget, remaining_hours: r2(Math.max(0, settings.weeklyTarget - main)),
+    overtime_hours: r2(Math.max(0, main - settings.weeklyTarget)), all_jobs_hours: r2(total),
+    days: entries.sort((a, b) => a.date.localeCompare(b.date)).map((w) => ({ date: w.date, job: w.job, start: w.start || null, end: w.end || null, hours: w.hours, note: w.description || null })),
+  };
+}
+const r2 = (x) => Math.round(x * 100) / 100;
+
 // Older entries (created in the browser) may have no id; give them one so the AI can edit them.
 export async function loadFoods(env, date) {
   const foods = await getKey(env, 'foods:' + date, []);

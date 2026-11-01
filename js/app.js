@@ -39,6 +39,7 @@ function render() {
   renderModules();
   renderSchedule();
   fillTargets();
+  fillWorkSettings();
   drawCharts();
 }
 
@@ -47,6 +48,7 @@ function drawCharts() {
   renderMeasurements();
   renderDeficit();
   drawWeightCharts();
+  drawWorkChart();
 }
 
 // ---------- startup ----------

@@ -62,6 +62,8 @@ network first, so a normal reload picks up the new version.
 | `log_water`, `log_weight`, `log_steps` | Daily tracking |
 | `complete_day` | Mark a day fully logged (counts toward the deficit chart) |
 | `get_progress` | Weight history and the last 7 days of calories |
+| `log_workday` | Log a main job workday from start and finish times (e.g. "I started at 7:30 and finished at 15:45"); logging the same day again corrects it |
+| `get_work_week` | Hours for a Monday to Sunday week vs the weekly target, overtime, all jobs total |
 
 The connector URL contains your key, so treat it like a password. To rotate it,
 run `npx wrangler secret put FORMA_KEY` again and reconnect each device and AI app.

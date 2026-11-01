@@ -23,7 +23,7 @@ function chart(id, type, labels, datasets) {
   let min = Math.min(...nums), max = Math.max(...nums);
   if (type === 'bar') min = Math.min(0, min);
   if (max === min) { const pad = Math.max(1, Math.abs(max) * .025); min -= pad; max += pad; }
-  else { const pad = (max - min) * .12; min -= pad; max += pad; }
+  else { const pad = (max - min) * .12, floor = Math.min(...nums) >= 0 ? 0 : -Infinity; min = Math.max(floor, min - pad); max += pad; }
   const y = (v) => top + plotH - (v - min) / (max - min) * plotH;
 
   // Grid and y axis

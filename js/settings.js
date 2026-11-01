@@ -9,6 +9,29 @@ function fillTargets() {
   document.getElementById('tSteps').value = state.targets.steps;
 }
 
+function fillWorkSettings() {
+  if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#workSettingsForm')) return;
+  const ws = state.workSettings;
+  document.getElementById('wsJob').value = ws.job;
+  document.getElementById('wsHours').value = ws.hoursPerDay;
+  document.getElementById('wsTarget').value = ws.weeklyTarget;
+  document.getElementById('wsEarliest').value = ws.earliestStart;
+  document.getElementById('wsLatest').value = ws.latestStart;
+}
+
+function saveWorkSettings(e) {
+  e.preventDefault();
+  if (parseTime(val('wsLatest')) < parseTime(val('wsEarliest'))) { alert('The latest start must be after the earliest start.'); return; }
+  state.workSettings = {
+    ...state.workSettings, job: val('wsJob').trim() || WORK_DEFAULTS.job,
+    hoursPerDay: Number(val('wsHours')), weeklyTarget: Number(val('wsTarget')),
+    earliestStart: val('wsEarliest'), latestStart: val('wsLatest'),
+  };
+  persist();
+  setText('workSettingsStatus', 'Saved ✓ Claude uses these settings too once it syncs.');
+  render();
+}
+
 function saveTargets(e) {
   e.preventDefault();
   state.calorieTarget = Math.round(Number(val('tCal')));

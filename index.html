@@ -325,7 +325,24 @@
     <section class="page" id="work">
       <div class="module-hero"><span class="eyebrow">WORK & PRODUCTIVITY</span><h2>Manage both jobs 💼</h2><p>Log hours by job, record what you worked on and review your week.</p></div>
       <div class="module-stats" id="workStats"></div>
-      <div class="sectionhead"><h3>Log work session</h3></div>
+
+      <div class="sectionhead"><h3>Log a workday</h3><span class="pill" id="workdayRule"></span></div>
+      <div class="card">
+        <form class="module-form" id="workdayForm" onsubmit="submitWorkday(event)">
+          <label class="time-field">Date<input class="field" id="wdDate" type="date" required onchange="renderWorkdayHint()"></label>
+          <label class="time-field">Started<input class="field" id="wdStart" type="time" required oninput="suggestWorkdayEnd()"></label>
+          <label class="time-field">Finished<input class="field" id="wdEnd" type="time" required oninput="renderWorkdayHint()"></label>
+          <label class="time-field" style="flex:2 1 200px">Note<input class="field" id="wdNote" placeholder="Optional"></label>
+          <button class="btn" type="submit">Save workday</button>
+        </form>
+        <p class="note" id="workdayHint"></p>
+        <p class="note">Or tell Claude at the end of the day: "Log my workday, I started at 7:30 and finished at 15:45."</p>
+      </div>
+
+      <div class="sectionhead"><h3>Hours per week</h3><span class="pill" id="workWeekPill"></span></div>
+      <div class="card"><div class="chartwrap"><canvas id="workWeeksChart"></canvas></div></div>
+
+      <div class="sectionhead"><h3>Other work</h3><small class="muted">Second job or extra sessions, logged in hours</small></div>
       <div class="card">
         <form class="module-form" onsubmit="addWork(event)">
           <input class="field" id="workJob" placeholder="Job or client name" required>
@@ -384,6 +401,19 @@
           <div><button class="btn" type="submit">Save targets</button></div>
         </form>
         <p class="note" id="targetStatus">These are starting values, not medical prescriptions.</p>
+      </div>
+
+      <div class="sectionhead"><h3>Work</h3></div>
+      <div class="card">
+        <form class="measure-form" id="workSettingsForm" onsubmit="saveWorkSettings(event)">
+          <label>Main job name<input class="field" id="wsJob" required maxlength="60"></label>
+          <label>Standard day (hours)<input class="field" type="number" id="wsHours" min="1" max="16" step="0.25" required></label>
+          <label>Weekly target (hours)<input class="field" type="number" id="wsTarget" min="1" max="100" step="0.5" required></label>
+          <label>Earliest start<input class="field" type="time" id="wsEarliest" required></label>
+          <label>Latest start<input class="field" type="time" id="wsLatest" required></label>
+          <div><button class="btn" type="submit">Save work settings</button></div>
+        </form>
+        <p class="note" id="workSettingsStatus">Workdays are Monday to Friday. Renaming the job keeps old entries under their old name.</p>
       </div>
 
       <div class="sectionhead"><h3>Cloud sync & AI logging</h3><span class="pill" id="syncPill">Not connected</span></div>

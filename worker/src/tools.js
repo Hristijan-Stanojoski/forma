@@ -2,7 +2,7 @@
 // Tool arguments use AI friendly names (calories, protein_g, portion); storage keeps the
 // dashboard field names (cal, p, c, fat, qty, meal).
 import { getKey, getKeys, putKey } from './storage.js';
-import { MEALS, START_KG, GOAL_KG, addDays, daySummary, loadFoods, newId, num, resolveDate, targets, todayIn } from './diary.js';
+import { MEALS, START_KG, GOAL_KG, addDays, daySummary, fmtTime, loadFoods, newId, num, parseTime, resolveDate, targets, todayIn, workSettings, workWeek } from './diary.js';
 
 const dateProp = { type: 'string', description: 'YYYY-MM-DD, "today" or "yesterday". Defaults to today (Europe/Skopje).' };
 const nutrientProps = {
@@ -72,6 +72,32 @@ export const TOOLS = [
     title: 'Mark day complete',
     description: 'Mark that ALL food and drinks for a day are logged (only complete days count toward the calorie deficit). Only call when the user says they are done for the day.',
     inputSchema: { type: 'object', properties: { date: dateProp, complete: { type: 'boolean', default: true } } },
+  },
+  {
+    name: 'log_workday',
+    title: 'Log a workday',
+    description:
+      'Log the user\'s workday at their main job with the time they started and finished (24 hour HH:MM, e.g. "07:30" and "15:30"). ' +
+      'Their normal day starts between 07:00 and 09:00 and lasts 8 hours. If they only give a start time, leave end out and the standard 8 hour finish is used. ' +
+      'Logging the same date again replaces that day. Afterwards tell them the hours for the day, any overtime or short time, and their total for the week so far.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        date: dateProp,
+        start: { type: 'string', description: 'Start time, e.g. "07:30"' },
+        end: { type: 'string', description: 'Finish time, e.g. "15:30". Optional: defaults to start + standard day length.' },
+        note: { type: 'string', description: 'Optional: what they worked on' },
+        job: { type: 'string', description: 'Optional: only for a job other than the main job' },
+      },
+      required: ['start'],
+    },
+  },
+  {
+    name: 'get_work_week',
+    title: 'Get work hours for a week',
+    description: 'Hours worked in the Monday to Sunday week containing a date (default this week): main job hours vs the weekly target, overtime, all jobs total and each day\'s start and end.',
+    inputSchema: { type: 'object', properties: { date: dateProp } },
+    annotations: { readOnlyHint: true },
   },
   {
     name: 'get_progress',
@@ -160,6 +186,35 @@ export async function callTool(env, name, a = {}) {
       await putKey(env, 'completedDays', days);
       return { date, day_marked_complete: days[date] };
     }
+    case 'log_workday': {
+      const date = resolveDate(env, a.date);
+      const settings = await workSettings(env);
+      const start = parseTime(a.start, 'start');
+      const standardEnd = start + Math.round(settings.hoursPerDay * 60);
+      const end = a.end === undefined || a.end === null || a.end === '' ? standardEnd : parseTime(a.end, 'end');
+      if (end <= start) throw new Error('end must be after start');
+      const job = a.job ? String(a.job).slice(0, 80) : settings.job;
+      const hours = Math.round((end - start) / 60 * 100) / 100;
+      const entry = { id: Date.now(), job, date, start: fmtTime(start), end: fmtTime(end), hours, kind: 'workday', source: 'ai' };
+      if (a.note) entry.description = String(a.note).slice(0, 200);
+      // One workday per date and job: logging again corrects it
+      const entries = (await getKey(env, 'workEntries', [])).filter((w) => !(w.kind === 'workday' && w.date === date && w.job === job));
+      entries.push(entry);
+      await putKey(env, 'workEntries', entries);
+      const notes = [];
+      if (start < parseTime(settings.earliestStart, 'earliestStart') || start > parseTime(settings.latestStart, 'latestStart')) {
+        notes.push(`Start is outside the usual ${settings.earliestStart} to ${settings.latestStart} window.`);
+      }
+      if (a.end === undefined || a.end === null || a.end === '') notes.push(`No end given, so the standard ${settings.hoursPerDay} hour day was used.`);
+      return {
+        logged: { date, job, start: entry.start, end: entry.end, hours },
+        standard_end: fmtTime(standardEnd),
+        difference_vs_standard_hours: Math.round((hours - settings.hoursPerDay) * 100) / 100,
+        notes, this_week: await workWeek(env, date),
+      };
+    }
+    case 'get_work_week':
+      return workWeek(env, resolveDate(env, a.date));
     case 'get_progress': {
       const today = todayIn(env);
       const dates = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));

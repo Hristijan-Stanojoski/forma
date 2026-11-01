@@ -7,7 +7,8 @@ const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const INSTRUCTIONS =
   'Forma is Hristijan\'s personal fitness diary (goal: 100 kg to 80 kg, Modified UN diet four day rotation). ' +
   'When the user describes what they ate or drank, estimate calories and macros yourself and call log_food. ' +
-  'Dates are Europe/Skopje local time. Always report what you logged and the remaining calories for the day.';
+  'Dates are Europe/Skopje local time. Always report what you logged and the remaining calories for the day. ' +
+  'When the user says when they started and finished work, call log_workday and report the day\'s hours and the week total.';
 
 async function handleRpc(env, msg) {
   const { id, method, params } = msg || {};

@@ -5,8 +5,6 @@ let scheduleView = 'week';   // 'day' | 'week' | 'month'
 let scheduleDate = today();  // selected day
 
 const WEEKDAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const weekdayIndex = (date) => (new Date(date + 'T12:00:00Z').getUTCDay() + 6) % 7; // Mon = 0
-const weekStartOf = (date) => addDays(date, -weekdayIndex(date));
 const shortDate = (date) => formatDate(date, { month: 'short', day: 'numeric' });
 function workoutFor(date) {
   const i = GYM_WEEKDAYS.indexOf(weekdayIndex(date));
@@ -25,6 +23,7 @@ function dayInfo(date) {
     diet: cycle(date), workout: workoutFor(date), workoutDone: !!state.workoutsDone[date],
     tasks, events: state.events.filter((e) => e.date === date).sort((a, b) => (a.time || '99').localeCompare(b.time || '99')),
     work, workHours: work.reduce((a, w) => a + Number(w.hours || 0), 0),
+    isWorkday: WORK_WEEKDAYS.includes(weekdayIndex(date)), workday: workdayOn(date),
     money: state.financeEntries.filter((x) => x.date === date),
     foods, food: sumFoods(foods), complete: !!state.completedDays[date],
     water: state.water[date] || 0, steps: state.steps[date] || 0,
@@ -68,7 +67,11 @@ function renderSchedule() {
     const start = weekStartOf(scheduleDate);
     period = `${shortDate(start)} to ${shortDate(addDays(start, 6))}`;
     grid.className = 'week-grid';
-    grid.innerHTML = Array.from({ length: 7 }, (_, i) => weekCardHTML(dayInfo(addDays(start, i)))).join('');
+    const ws = state.workSettings, wk = workWeekTotals(start);
+    grid.innerHTML = Array.from({ length: 7 }, (_, i) => weekCardHTML(dayInfo(addDays(start, i)))).join('')
+      + `<div class="week-work"><span>💼 <b>${fmtHours(wk.main)}</b> of ${ws.weeklyTarget}h at ${escapeHTML(ws.job)}${wk.main > ws.weeklyTarget ? ` · <b>${fmtHours(wk.main - ws.weeklyTarget)} overtime</b>` : ''}</span>`
+      + `<span class="muted">${wk.days} workday${wk.days === 1 ? '' : 's'} logged${wk.all > wk.main ? ` · ${fmtHours(wk.all)} all jobs` : ''}</span>`
+      + `<span class="week-work-bar"><i style="width:${Math.min(100, wk.main / ws.weeklyTarget * 100)}%"></i></span></div>`;
   } else {
     period = formatDate(scheduleDate, { month: 'long', year: 'numeric' });
     grid.className = 'month-grid';
@@ -100,7 +103,8 @@ function weekCardHTML(info) {
   const badges = [
     info.tasks.length ? `<span>🧹 ${tasksDone}/${info.tasks.length}</span>` : '',
     info.events.length ? `<span>📌 ${eventsDone}/${info.events.length}</span>` : '',
-    info.workHours ? `<span>💼 ${+info.workHours.toFixed(1)}h</span>` : '',
+    info.workHours ? `<span>💼 ${fmtHours(info.workHours)}</span>`
+      : info.isWorkday ? `<span class="${info.when === 'past' ? 'missing' : 'planned'}">💼 ${info.when === 'past' ? 'not logged' : state.workSettings.hoursPerDay + 'h'}</span>` : '',
   ].join('');
   const food = info.when === 'future' ? '' : info.foods.length
     ? `<small class="sd-food ${info.complete ? 'ok' : ''}">${info.complete ? '✓ ' : ''}${Math.round(info.food.cal).toLocaleString()} kcal</small>`
@@ -125,7 +129,8 @@ function monthHTML() {
     const inMonth = info.date.slice(0, 7) === first.slice(0, 7);
     const icons = [
       info.workout ? (info.workoutDone ? '<b class="tick">🏋️</b>' : '🏋️') : '',
-      info.tasks.length ? '🧹' : '', info.events.length ? '📌' : '', info.workHours ? '💼' : '',
+      info.tasks.length ? '🧹' : '', info.events.length ? '📌' : '',
+      info.workHours ? '💼' : info.isWorkday ? '<span class="dim">💼</span>' : '',
     ].join('');
     const done = info.when !== 'future' && info.complete;
     return `<button type="button" class="month-day ${dayClasses(info)} ${inMonth ? '' : 'other-month'}" onclick="selectScheduleDay('${info.date}')" aria-label="${formatDate(info.date, { weekday: 'long', month: 'long', day: 'numeric' })}">
@@ -174,9 +179,21 @@ function dayDetailHTML(info) {
         <button type="button" class="x" data-id="${escapeHTML(e.id)}" onclick="deleteEvent(this.dataset.id)" aria-label="Delete plan">✕</button></div>`).join('')}</div>`
     : '<p class="muted">Nothing planned.</p>'}</div>`);
 
-  // Work, money, body (only when there is something)
-  if (info.work.length) sections.push(`<div class="detail-block"><h4>💼 Work · ${+info.workHours.toFixed(2)}h</h4>
-      <ul class="plain">${info.work.map((w) => `<li><b>${escapeHTML(w.job)}</b> ${w.hours}h${w.description ? ' · ' + escapeHTML(w.description) : ''}</li>`).join('')}</ul></div>`);
+  // Work: logged entries, or the expected workday (with a quick log form once the day has started)
+  const ws = state.workSettings;
+  if (info.work.length || info.isWorkday) {
+    const list = info.work.length ? `<ul class="plain">${info.work.map((w) => `<li><b>${escapeHTML(w.job)}</b> ${w.start ? `${escapeHTML(w.start)} to ${escapeHTML(w.end)} · ` : ''}${fmtHours(Number(w.hours || 0))}${w.description ? ' · ' + escapeHTML(w.description) : ''}</li>`).join('')}</ul>` : '';
+    const expected = !info.workday && info.isWorkday
+      ? `<p class="muted">${info.when === 'past' ? 'Workday not logged.' : `Start between ${ws.earliestStart} and ${ws.latestStart}, finish ${ws.hoursPerDay}h later.`}</p>` : '';
+    const quick = !info.workday && info.isWorkday && info.when !== 'future'
+      ? `<form class="quick-workday" onsubmit="quickWorkday(event,'${info.date}')">
+          <input class="field" type="time" name="start" aria-label="Started" required oninput="if(!this.form.end.dataset.typed)this.form.end.value=standardEnd(this.value)">
+          <span class="muted">to</span>
+          <input class="field" type="time" name="end" aria-label="Finished" required oninput="this.dataset.typed=1">
+          <button class="btn secondary" type="submit">Log</button>
+        </form>` : '';
+    sections.push(`<div class="detail-block"><h4>💼 Work${info.workHours ? ' · ' + fmtHours(info.workHours) : ''}</h4>${list}${expected}${quick}</div>`);
+  }
   if (info.money.length) sections.push(`<div class="detail-block"><h4>💳 Money</h4>
       <ul class="plain">${info.money.map((x) => `<li>${escapeHTML(x.note)} <b style="color:${x.type === 'income' ? '#22875f' : '#a45b4a'}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</b></li>`).join('')}</ul></div>`);
   if (info.weight) sections.push(`<div class="detail-block"><h4>⚖️ Weigh in</h4><p>${info.weight.value.toFixed(1)} kg</p></div>`);
@@ -223,6 +240,11 @@ function deleteEvent(id) {
   state.events = state.events.filter((x) => x.id !== id);
   persist();
   render();
+}
+function quickWorkday(e, date) {
+  e.preventDefault();
+  const err = saveWorkday(date, e.target.start.value, e.target.end.value, '');
+  if (err) alert(err);
 }
 function toggleWorkoutDone(date, done) {
   if (done) state.workoutsDone[date] = true; else delete state.workoutsDone[date];

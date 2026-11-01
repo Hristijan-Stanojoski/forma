@@ -10,6 +10,18 @@ function addDays(date, n) {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+const weekdayIndex = (date) => (new Date(date + 'T12:00:00Z').getUTCDay() + 6) % 7; // Mon = 0
+const weekStartOf = (date) => addDays(date, -weekdayIndex(date));
+// "07:30", "7:30", "7:30pm" -> minutes after midnight (NaN if invalid). Same rules as the Worker.
+function parseTime(v) {
+  const m = /^(\d{1,2})(?::|\.|h)?(\d{2})?\s*(am|pm)?$/i.exec(String(v ?? '').trim());
+  if (!m) return NaN;
+  let h = Number(m[1]);
+  const min = m[2] ? Number(m[2]) : 0;
+  if (m[3]) { const pm = m[3].toLowerCase() === 'pm'; if (h === 12) h = pm ? 12 : 0; else if (pm) h += 12; }
+  return h > 23 || min > 59 ? NaN : h * 60 + min;
+}
+const fmtTime = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 function formatDate(date, opts = { month: 'short', day: 'numeric', year: 'numeric' }) {
   return new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', { timeZone: 'UTC', ...opts });
 }
@@ -34,6 +46,7 @@ function applyDefaults(st) {
   st.favorites ??= DEFAULT_FAVORITES.map((f) => ({ ...f }));
   st.events ??= [];        // schedule plans: {id, date, title, time?, done}
   st.workoutsDone ??= {};  // date -> true when that day's gym session is done
+  st.workSettings = { ...WORK_DEFAULTS, ...(st.workSettings || {}) };
   st.targets ??= {};
   st.targets.protein ??= 140;
   st.targets.water ??= 2.5;
