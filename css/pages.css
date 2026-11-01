@@ -194,6 +194,17 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
 .time-field{display:grid;gap:4px;flex:1 1 130px;font-size:11px;font-weight:700;color:#697870}
 .time-field .field{width:100%}
 #workdayForm{align-items:end}
+.balance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.balance-card{display:flex;flex-direction:column;gap:6px}
+.balance-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.balance-name{font-weight:750}
+.balance-name small{color:var(--muted);font-weight:700;font-size:11px;margin-left:3px}
+.balance-amount{font-size:30px;letter-spacing:-.5px}
+.balance-card .up{color:var(--green);font-weight:700}
+.balance-card .down{color:#a45b4a;font-weight:700}
+.balance-form{display:flex;gap:8px;margin-top:8px}
+.balance-form .field{flex:1;min-width:0}
+.pill.warn{background:#fff4e6;color:#a35a14}
 .grocery-total{font-weight:750;text-align:right;margin-top:12px}
 .expense-row{margin:12px 0}
 .expense-row .expense-meta{display:flex;justify-content:space-between;font-size:12px}
@@ -223,6 +234,7 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
   .adaptive{grid-template-columns:1fr}
   .module-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .module-form{flex-direction:column}
+  .balance-grid{grid-template-columns:1fr}
   .module-form .field{width:100%}
   .module-hero{padding:20px}
   #workdayForm{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}

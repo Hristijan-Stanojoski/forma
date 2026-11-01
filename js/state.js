@@ -47,6 +47,9 @@ function applyDefaults(st) {
   st.events ??= [];        // schedule plans: {id, date, title, time?, done}
   st.workoutsDone ??= {};  // date -> true when that day's gym session is done
   st.workSettings = { ...WORK_DEFAULTS, ...(st.workSettings || {}) };
+  // account -> [{id, date, balance, kind: 'start' | 'update' | 'withdrawal', amount?, fromUsd?}]
+  st.balances ??= {};
+  for (const [key, , , , , start] of ACCOUNTS) st.balances[key] ??= [{ id: 'start-' + key, date: DIET_START, balance: start, kind: 'start' }];
   st.targets ??= {};
   st.targets.protein ??= 140;
   st.targets.water ??= 2.5;

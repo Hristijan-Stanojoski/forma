@@ -23,6 +23,7 @@ Goal: 100 kg → 80 kg on a Modified UN diet (4 day rotation starting 2026-11-01
   - `GET/PUT /api/state` (Bearer `FORMA_KEY`) for the dashboard.
   - `POST /mcp/<FORMA_KEY>` — stateless MCP server (JSON-RPC, JSON responses) used by Claude and ChatGPT connectors. Tools: log_food, get_day, update_food, delete_food, log_water, log_weight, log_steps, complete_day, get_progress, log_workday, get_work_week.
   - Work: `workEntries` items are `{id, job, date, hours, description?}`; main job workdays add `start`, `end` (HH:MM) and `kind: 'workday'` (one per date and job, logging again replaces it). `workSettings` (job, hoursPerDay, earliestStart, latestStart, weeklyTarget) defaults live in both `js/data.js` and `worker/src/diary.js`; keep them in sync.
+  - Finances: `state.balances` maps each account in `ACCOUNTS` (`js/data.js`: upwork USD, bank EUR, with starting balances) to `[{id, date, balance, kind: 'start'|'update'|'withdrawal', amount?, fromUsd?}]`; the latest entry is the current balance. A withdrawal adds one entry to each account with the same id (deleting one deletes both).
   - Storage keys: one row per top level state field, plus `foods:YYYY-MM-DD` per day. Server keys must match `^[A-Za-z]+(:\d{4}-\d{2}-\d{2})?$`.
   - Food entry shape: `{id, name, qty, meal, cal, p, c, fat, estimated?, source?}`.
   - Dates use Europe/Skopje local time.

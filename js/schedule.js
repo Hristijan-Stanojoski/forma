@@ -25,6 +25,7 @@ function dayInfo(date) {
     work, workHours: work.reduce((a, w) => a + Number(w.hours || 0), 0),
     isWorkday: WORK_WEEKDAYS.includes(weekdayIndex(date)), workday: workdayOn(date),
     money: state.financeEntries.filter((x) => x.date === date),
+    balances: ACCOUNTS.flatMap(([key]) => state.balances[key].filter((b) => b.date === date && b.kind !== 'start').map((b) => ({ ...b, account: key }))),
     foods, food: sumFoods(foods), complete: !!state.completedDays[date],
     water: state.water[date] || 0, steps: state.steps[date] || 0,
     weight: state.weights.find((w) => w.date === date),
@@ -213,6 +214,8 @@ function dayDetailHTML(info) {
         </form>` : '';
     sections.push(`<div class="detail-block"><h4>💼 Work${info.workHours ? ' · ' + fmtHours(info.workHours) : ''}</h4>${list}${expected}${quick}</div>`);
   }
+  if (info.balances.length) sections.push(`<div class="detail-block"><h4>🏦 Balances</h4>
+      <ul class="plain">${info.balances.map((b) => `<li>${balanceLabel(b)}</li>`).join('')}</ul></div>`);
   if (info.money.length) sections.push(`<div class="detail-block"><h4>💳 Money</h4>
       <ul class="plain">${info.money.map((x) => `<li>${escapeHTML(x.note)} <b style="color:${x.type === 'income' ? '#22875f' : '#a45b4a'}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</b></li>`).join('')}</ul></div>`);
   if (info.weight) sections.push(`<div class="detail-block"><h4>⚖️ Weigh in</h4><p>${info.weight.value.toFixed(1)} kg</p></div>`);

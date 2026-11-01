@@ -133,6 +133,86 @@ function deleteTransaction(id) {
   persist();
   render();
 }
+// ---------- balances (Upwork in USD, bank in EUR) ----------
+const accountInfo = (key) => ACCOUNTS.find((a) => a[0] === key);
+const fmtMoney = (n, currency) => n.toLocaleString('en-US', { style: 'currency', currency });
+// Oldest first; on the same day the starting balance comes before later updates.
+const balanceOrder = (a, b) => a.date.localeCompare(b.date) || (b.kind === 'start') - (a.kind === 'start') || String(a.id).localeCompare(String(b.id));
+const sortedBalances = (key) => state.balances[key].slice().sort(balanceOrder);
+const latestBalance = (key) => sortedBalances(key).slice(-1)[0];
+const balanceId = () => 'b' + Date.now().toString(36);
+
+function balanceLabel(b) {
+  const [, name, currency] = accountInfo(b.account);
+  if (b.kind === 'withdrawal') {
+    return b.account === 'upwork'
+      ? `Withdrew ${fmtMoney(b.amount, currency)} from ${name}, now <b>${fmtMoney(b.balance, currency)}</b>`
+      : `Received ${fmtMoney(b.amount, currency)} in your ${name.toLowerCase()}, now <b>${fmtMoney(b.balance, currency)}</b>`;
+  }
+  return `${name} ${b.kind === 'start' ? 'starting balance' : 'updated to'} <b>${fmtMoney(b.balance, currency)}</b>`;
+}
+
+function updateBalance(e, key) {
+  e.preventDefault();
+  const input = e.target.querySelector('input'), n = Number(input.value);
+  if (input.value.trim() === '' || !Number.isFinite(n) || n < 0) { alert('Enter the balance as a number.'); return; }
+  state.balances[key].push({ id: balanceId(), date: today(), balance: Math.round(n * 100) / 100, kind: 'update' });
+  persist();
+  render();
+}
+
+// Moving money: the USD leaves Upwork and whatever actually arrived (after fees and the rate) lands in the bank.
+function withdrawUpwork(e) {
+  e.preventDefault();
+  const usd = Number(val('withdrawUsd')), eur = Number(val('withdrawEur'));
+  if (!(usd > 0) || !(eur > 0)) { alert('Enter both the USD you withdrew and the EUR that arrived.'); return; }
+  const up = latestBalance('upwork').balance, bank = latestBalance('bank').balance;
+  if (usd > up + 0.005 && !confirm(`That is more than your Upwork balance of ${fmtMoney(up, 'USD')}. Save it anyway?`)) return;
+  const id = balanceId(), date = today(), r2 = (n) => Math.round(n * 100) / 100;
+  state.balances.upwork.push({ id, date, balance: r2(Math.max(0, up - usd)), kind: 'withdrawal', amount: usd });
+  state.balances.bank.push({ id, date, balance: r2(bank + eur), kind: 'withdrawal', amount: eur, fromUsd: usd });
+  persist();
+  e.target.reset();
+  render();
+}
+
+// Deleting one half of a withdrawal removes both halves (they share an id).
+function deleteBalance(key, id) {
+  const entry = state.balances[key].find((b) => b.id === id);
+  if (!entry || !confirm(entry.kind === 'withdrawal' ? 'Delete this withdrawal from both Upwork and your bank account?' : 'Delete this balance update?')) return;
+  for (const k of entry.kind === 'withdrawal' ? ['upwork', 'bank'] : [key]) state.balances[k] = state.balances[k].filter((b) => b.id !== id);
+  persist();
+  render();
+}
+
+function renderBalances() {
+  document.getElementById('balanceCards').innerHTML = ACCOUNTS.map(([key, name, currency, icon, cadence]) => {
+    const rows = sortedBalances(key), last = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const age = Math.round((new Date(today()) - new Date(last.date)) / 864e5);
+    const diff = prev ? last.balance - prev.balance : null;
+    const due = key === 'upwork' && age >= UPWORK_UPDATE_DAYS;
+    const status = due ? `<span class="pill warn">Weekly update due</span>` : `<span class="pill">${cadence}</span>`;
+    return `<div class="card balance-card">
+      <div class="balance-top"><span class="balance-name">${icon} ${name} <small>${currency}</small></span>${status}</div>
+      <strong class="balance-amount">${fmtMoney(last.balance, currency)}</strong>
+      <small class="muted">Updated ${age === 0 ? 'today' : age === 1 ? 'yesterday' : age + ' days ago'} (${formatDate(last.date, { month: 'short', day: 'numeric' })})${diff !== null && Math.abs(diff) >= 0.005 ? ` · <span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${fmtMoney(Math.abs(diff), currency)}</span>` : ''}</small>
+      <form class="balance-form" onsubmit="updateBalance(event,'${key}')">
+        <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="New balance (${currency})" aria-label="New ${name} balance">
+        <button class="btn secondary" type="submit">Update</button>
+      </form>
+    </div>`;
+  }).join('');
+
+  const history = ACCOUNTS.flatMap(([key]) => state.balances[key].map((b) => ({ ...b, account: key })))
+    .filter((b) => !(b.kind === 'withdrawal' && b.account === 'upwork')) // a withdrawal shows once, from the bank side
+    .sort((a, b) => balanceOrder(b, a));
+  document.getElementById('balanceHistory').innerHTML = history.slice(0, 12).map((b) => `<div class="module-item">
+      <div class="module-copy">${b.kind === 'withdrawal'
+        ? `<b>⇄ Upwork to bank</b><small>${fmtMoney(b.fromUsd, 'USD')} out, ${fmtMoney(b.amount, 'EUR')} in (${(b.amount / b.fromUsd).toFixed(4)} EUR per USD) · ${formatDate(b.date)}</small>`
+        : `<b>${balanceLabel(b)}</b><small>${formatDate(b.date)}</small>`}</div>
+      ${b.kind === 'start' ? '' : `<button onclick="deleteBalance('${b.account}','${escapeHTML(String(b.id))}')" aria-label="Delete">✕</button>`}</div>`).join('');
+}
+
 function addGrocery(e) {
   e.preventDefault();
   const name = val('groceryName').trim(), price = Number(val('groceryPrice') || 0);
@@ -185,6 +265,7 @@ function renderModules() {
         <button onclick="deleteWork(${Number(t.id)})" aria-label="Delete work entry">✕</button></div>`).join('')
     : '<p class="muted">No work logged yet.</p>';
 
+  renderBalances();
   const month = today().slice(0, 7), monthEntries = state.financeEntries.filter((x) => x.date.startsWith(month));
   const income = monthEntries.filter((x) => x.type === 'income').reduce((a, x) => a + x.amount, 0);
   const expenses = monthEntries.filter((x) => x.type === 'expense').reduce((a, x) => a + x.amount, 0);

@@ -368,6 +368,19 @@
     <!-- ===================== Finance ===================== -->
     <section class="page" id="finance">
       <div class="module-hero"><span class="eyebrow">PERSONAL FINANCES</span><h2>Money & groceries 💳</h2><p>Track income and spending, and prepare a grocery list for your diet.</p></div>
+      <div class="sectionhead"><h3>Balances</h3></div>
+      <div class="balance-grid" id="balanceCards"></div>
+      <div class="sectionhead"><h3>Withdraw from Upwork</h3></div>
+      <div class="card">
+        <form class="module-form" id="withdrawForm" onsubmit="withdrawUpwork(event)">
+          <input class="field" id="withdrawUsd" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Withdrawn from Upwork (USD)" required>
+          <input class="field" id="withdrawEur" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Arrived in the bank (EUR)" required>
+          <button class="btn" type="submit">⇄ Save withdrawal</button>
+        </form>
+        <p class="note">Enter what actually landed in your bank, so fees and the exchange rate are already counted. Both balances update together.</p>
+        <details class="mini" style="margin-top:12px"><summary>Balance history</summary><div class="module-list" id="balanceHistory" style="margin-top:10px"></div></details>
+      </div>
+      <div class="sectionhead"><h3>This month</h3></div>
       <div class="module-stats" id="financeStats"></div>
       <div class="sectionhead"><h3>Add transaction</h3></div>
       <div class="card">
