@@ -262,7 +262,7 @@ function importNov1() {
   for (const item of NOV1_ITEMS) {
     const seedId = 'nov1-' + normalizedFoodName(item.name);
     if (!list.some((f) => f.seedId === seedId || normalizedFoodName(f.name) === normalizedFoodName(item.name))) {
-      list.push({ ...item, id: newFoodId(), seedId, estimated: true });
+      list.push({ ...item, id: seedId, seedId, estimated: true }); // same id on every device, so syncing never duplicates it
     }
   }
   state.water[NOV1_DATE] = Math.max(Number(state.water[NOV1_DATE] || 0), .8);

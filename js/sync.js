@@ -65,8 +65,7 @@ function merge3(base, mine, theirs) {
   return mine;
 }
 
-async function api(method, body) {
-  const c = cloud();
+async function api(method, body, c = cloud()) {
   const res = await fetch(c.url.replace(/\/+$/, '') + '/api/state', {
     method,
     headers: { Authorization: 'Bearer ' + c.key, 'Content-Type': 'application/json' },
@@ -84,8 +83,38 @@ function scheduleSync(delay = 500) {
   syncTimer = setTimeout(syncNow, delay);
 }
 
+// True when this browser holds data you entered (not just defaults or the Nov 1 sample day).
+function hasLocalData(st) {
+  const realFood = Object.values(st.foods).some((list) => list.some((f) => !f.seedId));
+  return realFood || ['weights', 'measurements', 'workEntries', 'financeEntries', 'homeTasks', 'events', 'groceryItems'].some((k) => (st[k] || []).length);
+}
+
+// Link this browser to the cloud. With local data you choose: merge it in, or replace it with the cloud copy.
+async function connectWith(url, key) {
+  const c = { url: url.replace(/\/+$/, ''), key };
+  const remote = flattenState((await api('GET', null, c)).state);
+  localStorage.setItem(CLOUD_KEY, JSON.stringify(c));
+  const useCloud = Object.keys(remote).length && (!hasLocalData(state) || confirm(
+    'Your cloud already has data.\n\nOK: show the cloud data on this device (recommended).\nCancel: merge what is saved in this browser into the cloud.'));
+  if (useCloud) {
+    syncBase = remote;
+    state = applyDefaults(unflattenState(remote));
+    saveLocal();
+  } else {
+    // Merging against a blank state means untouched defaults here never overwrite real values in the cloud.
+    syncBase = flattenState(applyDefaults({}));
+  }
+  localStorage.setItem(BASE_KEY, JSON.stringify(syncBase));
+  await syncNow();
+  render();
+}
+
 async function syncNow() {
-  if (!cloud() || !syncBase) return;
+  if (!cloud()) return;
+  if (!syncBase) { // connected but the last sync snapshot is gone: take the cloud copy and carry on
+    try { await connectWith(cloud().url, cloud().key); } catch (e) { syncError = e.message || 'Offline'; renderSyncStatus(); }
+    return;
+  }
   if (syncing) { syncAgain = true; return; }
   syncing = true;
   clearTimeout(syncTimer);
@@ -122,20 +151,60 @@ async function syncNow() {
 
 function renderSyncStatus() {
   const c = cloud();
-  const badge = document.getElementById('syncBadge'), pill = document.getElementById('syncPill'), st = document.getElementById('syncStatus');
-  if (!badge) return;
   const time = lastSyncAt ? lastSyncAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-  const text = !c ? 'Saved on this device' : syncError ? '⚠ ' + syncError + ' · saved on this device' : lastSyncAt ? '☁ Synced ' + time : '☁ Connecting…';
-  badge.textContent = text;
-  if (pill) pill.textContent = !c ? 'Not connected' : syncError ? 'Offline' : 'Connected';
-  if (st) st.textContent = c ? text + (syncError ? '. Changes will sync when the connection is back.' : '') : 'Your data stays in this browser until you connect.';
+  const text = !c ? 'Saved on this device only' : syncError ? '⚠ ' + syncError + ' · saved on this device' : lastSyncAt ? '☁ Synced ' + time : '☁ Connecting…';
+  setText('syncBadge', text);
+  const chip = document.getElementById('syncChip');
+  if (chip) {
+    chip.className = 'sync-chip ' + (!c || syncError ? 'warn' : lastSyncAt ? 'ok' : '');
+    chip.textContent = !c ? '⚠ Not synced' : syncError ? '⚠ Offline' : lastSyncAt ? '☁ ' + time : '☁ …';
+    chip.title = text;
+  }
+  // Banner on every page while this device is not synced, so a phone never silently shows only its own data.
+  const banner = document.getElementById('syncBanner');
+  if (banner) {
+    const problem = !c ? 'This device is not synced, so you only see what was saved in this browser.'
+      : syncError === 'Wrong secret key' ? 'Sync stopped because the secret key is wrong. Reconnect this device in Settings.' : '';
+    banner.style.display = problem ? 'flex' : 'none';
+    if (problem) setText('syncBannerText', problem);
+  }
+  setText('syncPill', !c ? 'Not connected' : syncError ? 'Offline' : 'Connected');
+  setText('syncStatus', c ? text + (syncError ? '. Changes will sync when the connection is back.' : '') : 'Your data stays in this browser until you connect.');
   const box = document.getElementById('cloudConnected');
   if (box) {
     box.style.display = c ? 'block' : 'none';
-    if (c) document.getElementById('mcpUrl').value = c.url.replace(/\/+$/, '') + '/mcp/' + c.key;
+    if (c) {
+      document.getElementById('mcpUrl').value = c.url + '/mcp/' + c.key;
+      document.getElementById('deviceLink').value = deviceLink(c);
+    }
   }
   const form = document.getElementById('cloudForm');
-  if (form) form.style.display = c ? 'none' : 'flex';
+  if (form) {
+    form.style.display = c ? 'none' : 'flex';
+    const urlInput = document.getElementById('cloudUrl');
+    if (!urlInput.value) urlInput.value = DEFAULT_API;
+  }
+}
+
+// Opening this link on another device connects it straight away (the key sits in the #hash, which browsers never send to a server).
+function deviceLink(c) {
+  const base = location.origin + location.pathname;
+  return base + '#link=' + encodeURIComponent(c.key) + (c.url === DEFAULT_API ? '' : '&api=' + encodeURIComponent(c.url));
+}
+
+async function connectFromLink() {
+  const m = location.hash.match(/^#link=([^&]+)(?:&api=(.+))?$/);
+  if (!m) return false;
+  history.replaceState(null, '', location.pathname + '#dashboard'); // keep the key out of the address bar
+  try {
+    await connectWith(m[2] ? decodeURIComponent(m[2]) : DEFAULT_API, decodeURIComponent(m[1]));
+    setText('syncStatus', 'This device is now connected ✓');
+  } catch (err) {
+    localStorage.removeItem(CLOUD_KEY);
+    alert('Could not connect this device: ' + err.message);
+  }
+  renderSyncStatus();
+  return true;
 }
 
 async function connectCloud(e) {
@@ -143,19 +212,9 @@ async function connectCloud(e) {
   const url = document.getElementById('cloudUrl').value.trim().replace(/\/+$/, '');
   const k = document.getElementById('cloudKey').value.trim();
   if (!/^https?:\/\//.test(url)) { alert('The API URL should start with https://'); return; }
-  localStorage.setItem(CLOUD_KEY, JSON.stringify({ url, key: k }));
   try {
-    const remote = flattenState((await api('GET')).state);
-    syncBase = {};
-    if (Object.keys(remote).length && confirm('Your cloud already has data.\n\nOK: use the cloud data on this device (recommended for a second device).\nCancel: merge this browser\'s data into the cloud.')) {
-      syncBase = remote;
-      state = applyDefaults(unflattenState(remote));
-      saveLocal();
-    }
-    localStorage.setItem(BASE_KEY, JSON.stringify(syncBase));
+    await connectWith(url, k);
     document.getElementById('cloudKey').value = '';
-    await syncNow();
-    render();
   } catch (err) {
     localStorage.removeItem(CLOUD_KEY);
     alert('Could not connect: ' + err.message);
@@ -171,14 +230,18 @@ function disconnectCloud() {
   renderSyncStatus();
 }
 
-function copyMcp() {
-  const el = document.getElementById('mcpUrl');
+function copyField(id, message) {
+  const el = document.getElementById(id);
   el.select();
   (navigator.clipboard ? navigator.clipboard.writeText(el.value) : Promise.reject())
-    .then(() => setText('syncStatus', 'Connector URL copied ✓'))
+    .then(() => setText('syncStatus', message))
     .catch(() => document.execCommand('copy'));
 }
+const copyMcp = () => copyField('mcpUrl', 'Connector URL copied ✓');
+const copyDeviceLink = () => copyField('deviceLink', 'Device link copied ✓ Open it on your phone or your other computer.');
 
 setInterval(() => { if (document.visibilityState === 'visible') syncNow(); }, SYNC_INTERVAL);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncNow(); });
+// Sync when the page comes back, and push pending changes right away when you switch apps or tabs.
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' || syncTimer) syncNow(); });
+window.addEventListener('pageshow', (e) => { if (e.persisted) syncNow(); });
 window.addEventListener('online', () => syncNow());

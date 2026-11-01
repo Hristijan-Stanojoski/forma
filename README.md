@@ -45,7 +45,10 @@ network first, so a normal reload picks up the new version.
 ## Connect
 
 1. Open the dashboard → **Settings → Cloud sync & AI logging**, enter the Worker URL and your key.
-   The first device uploads its existing browser data. Other devices choose "use cloud data".
+   The Worker URL is already filled in, so you only need the key. The first device uploads its existing browser data.
+   For every other device (your phone, another computer), copy the **device link** under "Link another device"
+   and open it there: it connects instantly and shows the same data. A ⚠ Not synced chip in the header means
+   that browser is not connected yet.
 2. Copy the **AI connector URL** shown there (`https://…workers.dev/mcp/<key>`).
 3. Claude: Settings → Connectors → Add custom connector → paste the URL.
    ChatGPT: Settings → Apps & Connectors → Advanced → Developer mode → Create → paste the URL (no authentication).

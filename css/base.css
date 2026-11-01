@@ -12,6 +12,11 @@ button{cursor:pointer}
 .top h1{font-size:29px;letter-spacing:-1px;margin:3px 0 0}
 .eyebrow{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--green);font-weight:800}
 .sub{color:var(--muted);margin:4px 0}
+.sync-chip{margin-left:auto;margin-right:10px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 12px;font-size:12px;font-weight:750;color:var(--muted);cursor:pointer;white-space:nowrap}
+.sync-chip.ok{color:var(--green);background:var(--light);border-color:#cfe9db}
+.sync-chip.warn{color:#a35a14;background:#fff4e6;border-color:#f6d7ad}
+.sync-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff4e6;border:1px solid #f6d7ad;color:#7a4510;border-radius:14px;padding:12px 14px;margin:-10px 0 18px;font-size:13px;font-weight:650}
+.sync-banner .btn{flex-shrink:0}
 .avatar{width:42px;height:42px;border-radius:50%;background:#d9f0e2;display:grid;place-items:center;font-weight:800;color:var(--green);flex-shrink:0}
 
 .page{display:none}
@@ -43,6 +48,9 @@ button{cursor:pointer}
 @media(max-width:720px){
   .main{padding:20px 15px 90px}
   .top{gap:8px;position:relative;z-index:50}
+  .top .avatar{display:none}
+  .sync-chip{margin:0;padding:7px 9px}
+  .sync-banner{flex-direction:column;align-items:stretch;text-align:left;margin-top:-6px}
   .top>div:first-child{min-width:0}
   .top h1{font-size:22px}
   .card{padding:15px}

@@ -39,8 +39,14 @@
         <label for="mobileMenuCheck" class="mobile-menu-label">☰ Menu</label>
         <nav class="mobile-menu-panel" id="mobileMenuPanel" aria-label="All pages"></nav>
       </div>
+      <button class="sync-chip" id="syncChip" type="button" onclick="go('settings')">☁ …</button>
       <div class="avatar">HS</div>
     </header>
+
+    <div class="sync-banner" id="syncBanner" style="display:none">
+      <span id="syncBannerText"></span>
+      <button class="btn" type="button" onclick="go('settings');document.getElementById('cloudKey').focus()">Connect</button>
+    </div>
 
     <!-- ===================== Dashboard ===================== -->
     <section class="page active" id="dashboard">
@@ -434,6 +440,12 @@
             <input class="field" id="mcpUrl" readonly onclick="this.select()">
             <button class="btn secondary" type="button" onclick="copyMcp()">Copy</button>
             <button class="btn outline" type="button" onclick="disconnectCloud()">Disconnect this device</button>
+          </div>
+          <b style="display:block;margin-top:16px">Link another device</b>
+          <p class="muted" style="margin:4px 0 8px">Open this link on your phone or another computer and it connects straight away and shows the same data. It contains your key, so only send it to yourself.</p>
+          <div class="formrow">
+            <input class="field" id="deviceLink" readonly onclick="this.select()">
+            <button class="btn secondary" type="button" onclick="copyDeviceLink()">Copy link</button>
           </div>
         </div>
         <p class="note" id="syncStatus"></p>

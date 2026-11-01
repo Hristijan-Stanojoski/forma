@@ -51,7 +51,13 @@ function applyDefaults(st) {
   st.targets.protein ??= 140;
   st.targets.water ??= 2.5;
   st.targets.steps ??= 4000;
-  for (const list of Object.values(st.foods)) if (Array.isArray(list)) for (const f of list) f.id ??= newFoodId();
+  for (const [date, list] of Object.entries(st.foods)) {
+    if (!Array.isArray(list)) continue;
+    for (const f of list) f.id ??= newFoodId();
+    // Older builds gave the Nov 1 sample foods random ids, so two devices could each add a copy.
+    const seen = new Set();
+    st.foods[date] = list.filter((f) => !f.seedId || (!seen.has(f.seedId) && seen.add(f.seedId)));
+  }
   return st;
 }
 

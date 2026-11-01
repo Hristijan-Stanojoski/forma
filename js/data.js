@@ -3,6 +3,7 @@
 const PROFILE = { startWeight: 100, goalWeight: 80, heightCm: 180, age: 28 };
 const DIET_START = '2026-11-01';
 const TIMEZONE = 'Europe/Skopje';
+const DEFAULT_API = 'https://forma-api.hristijanstanojoski.workers.dev'; // prefilled when connecting a device
 
 // [id, icon, nav label, page title, page subtitle]
 const PAGES = [

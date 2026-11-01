@@ -58,12 +58,15 @@ renderTraining();
 document.getElementById('workDate').value = today();
 if (!cloud() && !(state.foods[NOV1_DATE] || []).length) importNov1();
 
+// A "#link=<key>" device link connects this browser (it reads the hash before go() replaces it);
+// otherwise sync if it is already connected.
+connectFromLink().then((linked) => { if (!linked && cloud()) syncNow(); });
 const initial = location.hash.slice(1);
 go(PAGES.some((p) => p[0] === initial) ? initial : 'dashboard');
 renderSyncStatus();
-if (cloud() && syncBase) syncNow();
 
 window.addEventListener('hashchange', () => {
+  if (location.hash.startsWith('#link=')) { connectFromLink(); return; }
   const page = location.hash.slice(1);
   if (PAGES.some((p) => p[0] === page)) go(page);
 });
