@@ -44,22 +44,36 @@
 
     <!-- ===================== Dashboard ===================== -->
     <section class="page active" id="dashboard">
-      <div class="hero">
-        <div>
-          <small>YOUR BIG GOAL</small>
-          <h2>Road to 80 kg 🎯</h2>
-          <p>Every healthy choice moves you closer.</p>
-          <div class="hero-progress">
-            <div class="bar"><i id="goalbar"></i></div>
-            <div class="hero-metrics"><span>Started at 100 kg</span><span id="goalpercent">0% complete</span><span>Goal: 80 kg</span></div>
-          </div>
-        </div>
-        <div class="goal-grid">
-          <div class="goal-stat"><small>Current weight</small><strong id="currentWeight">100 kg</strong></div>
-          <div class="goal-stat"><small>Remaining</small><strong id="remaining">20 kg</strong></div>
-        </div>
+      <div class="sectionhead"><h3>Today's overview</h3><span class="pill" id="dietPill"></span></div>
+      <div class="metrics">
+        <div class="card metric"><div class="ico">🔥</div><div class="label">CALORIES EATEN</div><div><strong id="calorieMetric">0</strong><small id="calorieLimitLabel"></small></div><div class="track"><i id="calbar"></i></div><p class="metric-left" id="calorieLeft"></p></div>
+        <div class="card metric"><div class="ico">💪</div><div class="label">PROTEIN</div><div><strong id="proteinMetric">0g</strong><small id="proteinTargetLabel"></small></div><div class="track"><i id="probar"></i></div><p class="metric-left" id="proteinLeft"></p></div>
+        <div class="card metric"><div class="ico">💧</div><div class="label">WATER</div><div><strong id="waterMetric">0L</strong><small id="waterTargetLabel"></small></div><div class="track"><i id="waterbar"></i></div><p class="metric-left" id="waterLeft"></p></div>
+        <div class="card metric"><div class="ico">👟</div><div class="label">STEPS</div><div><strong id="stepsMetric">0</strong><small id="stepsTargetLabel"></small></div><div class="track"><i id="stepsbar"></i></div><p class="metric-left" id="stepsLeft"></p></div>
       </div>
-      <div id="weightInsight" class="insight good" role="status"></div>
+
+      <div class="card deficit-feature">
+        <div class="deficit-top">
+          <div>
+            <div class="label">🔥 CUMULATIVE CALORIE DEFICIT</div>
+            <div class="deficit-number" id="deficitTotal">0 kcal</div>
+            <p class="muted" style="margin:5px 0 0">Since Nov 1, 2026 · completed days plus today so far</p>
+          </div>
+          <span class="pill" id="deficitCoverage">Today so far</span>
+        </div>
+        <div class="deficit-cards">
+          <div><small>Today so far</small><strong id="deficitToday">0 kcal</strong></div>
+          <div><small>Estimated fat equivalent</small><strong id="fatEquivalent">0.00 kg</strong></div>
+          <div><small>Predicted weight</small><strong id="predictedWeight">100.00 kg</strong></div>
+          <div><small>Latest actual weight</small><strong id="deficitActualWeight">100.0 kg</strong></div>
+        </div>
+        <div class="deficit-graphs">
+          <div><b>Cumulative energy balance</b><div class="chartwrap"><canvas id="deficitChart"></canvas></div></div>
+          <div><b>Predicted vs actual weight</b><div class="chartwrap"><canvas id="predictedChart"></canvas></div></div>
+        </div>
+        <div id="deficitWarning" class="deficit-empty"></div>
+        <p class="deficit-hint">Estimates only. The model uses a sedentary energy expenditure estimate and a rough 7,700 kcal per kg conversion. Food measurement, changing activity, water retention and creatine can all move your actual weight. Today counts live and shrinks as you log more food. Past days only count once they are marked complete, so a half logged day never looks like a huge deficit.</p>
+      </div>
 
       <div class="card daily-feature">
         <div class="daily-heading">
@@ -84,16 +98,24 @@
         <p class="note" id="diaryNote"></p>
       </div>
 
-      <div class="sectionhead"><h3>Today's overview</h3><span class="pill" id="dietPill"></span></div>
-      <div class="metrics">
-        <div class="card metric"><div class="ico">🔥</div><div class="label">CALORIES EATEN</div><div><strong id="calorieMetric">0</strong><small id="calorieLimitLabel"></small></div><div class="track"><i id="calbar"></i></div></div>
-        <div class="card metric"><div class="ico">💪</div><div class="label">PROTEIN</div><div><strong id="proteinMetric">0g</strong><small id="proteinTargetLabel"></small></div><div class="track"><i id="probar"></i></div></div>
-        <div class="card metric"><div class="ico">💧</div><div class="label">WATER</div><div><strong id="waterMetric">0L</strong><small id="waterTargetLabel"></small></div><div class="track"><i id="waterbar"></i></div></div>
-        <div class="card metric"><div class="ico">👟</div><div class="label">STEPS</div><div><strong id="stepsMetric">0</strong><small id="stepsTargetLabel"></small></div><div class="track"><i id="stepsbar"></i></div></div>
-      </div>
-
       <div class="sectionhead"><h3>Progress insights</h3><a onclick="go('progress')">View analytics →</a></div>
-      <div class="twocol">
+      <div class="hero">
+        <div>
+          <small>YOUR BIG GOAL</small>
+          <h2>Road to 80 kg 🎯</h2>
+          <p>Every healthy choice moves you closer.</p>
+          <div class="hero-progress">
+            <div class="bar"><i id="goalbar"></i></div>
+            <div class="hero-metrics"><span>Started at 100 kg</span><span id="goalpercent">0% complete</span><span>Goal: 80 kg</span></div>
+          </div>
+        </div>
+        <div class="goal-grid">
+          <div class="goal-stat"><small>Current weight</small><strong id="currentWeight">100 kg</strong></div>
+          <div class="goal-stat"><small>Remaining</small><strong id="remaining">20 kg</strong></div>
+        </div>
+      </div>
+      <div id="weightInsight" class="insight good" role="status"></div>
+      <div class="twocol" style="margin-top:16px">
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b>Weight journey</b><span class="pill">Goal: 80 kg</span></div>
           <div class="chartwrap"><canvas id="weightChart"></canvas></div>
@@ -103,28 +125,6 @@
           <p class="muted">Stay consistent with the basics.</p>
           <div class="quick" id="tasks"></div>
         </div>
-      </div>
-
-      <div class="card deficit-feature">
-        <div class="deficit-top">
-          <div>
-            <div class="label">🔥 CUMULATIVE CALORIE DEFICIT</div>
-            <div class="deficit-number" id="deficitTotal">0 kcal</div>
-            <p class="muted" style="margin:5px 0 0">From Nov 1, 2026 · estimated from completed food logs</p>
-          </div>
-          <span class="pill" id="deficitCoverage">No completed days</span>
-        </div>
-        <div class="deficit-cards">
-          <div><small>Estimated fat equivalent</small><strong id="fatEquivalent">0.00 kg</strong></div>
-          <div><small>Predicted weight</small><strong id="predictedWeight">100.00 kg</strong></div>
-          <div><small>Latest actual weight</small><strong id="deficitActualWeight">100.0 kg</strong></div>
-        </div>
-        <div class="deficit-graphs">
-          <div><b>Cumulative energy balance</b><div class="chartwrap"><canvas id="deficitChart"></canvas></div></div>
-          <div><b>Predicted vs actual weight</b><div class="chartwrap"><canvas id="predictedChart"></canvas></div></div>
-        </div>
-        <div id="deficitWarning" class="deficit-empty"></div>
-        <p class="deficit-hint">Estimates only. The model uses a sedentary energy expenditure estimate and a rough 7,700 kcal per kg conversion. Food measurement, changing activity, water retention and creatine can all move your actual weight. Days that are not marked complete are left out, not counted as zero food.</p>
       </div>
 
       <div class="sectionhead"><h3>Today's meal inspiration</h3><a onclick="go('nutrition')">Open food tracker →</a></div>

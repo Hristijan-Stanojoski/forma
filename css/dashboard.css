@@ -24,9 +24,12 @@
 .metric small{color:var(--muted)}
 .metric .track{height:7px;background:#edf2ee;border-radius:10px;overflow:hidden;margin-top:14px}
 .metric .track i{height:100%;background:var(--green);display:block;border-radius:10px}
+.metric-left{margin:9px 0 0;font-size:12px;font-weight:700;color:#a4673a}
+.metric-left.done{color:var(--green)}
+.metric-left.over{color:#b5473a}
 
 /* Today's food diary */
-.daily-feature{margin-top:18px;border-color:#d8e9dd}
+.daily-feature{margin-top:27px;border-color:#d8e9dd}
 .daily-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .daily-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-top:18px}
 .daily-summary>div{background:#f3f8f4;padding:13px;border-radius:12px;min-width:0}
@@ -51,10 +54,10 @@
 .task small{display:block;color:var(--muted)}
 
 /* Cumulative deficit */
-.deficit-feature{margin-top:22px}
+.deficit-feature{margin-top:16px}
 .deficit-top{display:flex;justify-content:space-between;align-items:start;gap:15px;flex-wrap:wrap}
 .deficit-number{font-size:clamp(29px,5vw,43px);font-weight:850;letter-spacing:-1.5px;line-height:1.1;color:var(--dark)}
-.deficit-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0}
+.deficit-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:17px 0}
 .deficit-cards>div{background:#f5f8f6;border-radius:12px;padding:13px}
 .deficit-cards small{display:block;color:var(--muted);font-size:11px}
 .deficit-cards strong{display:block;font-size:20px;margin-top:5px}

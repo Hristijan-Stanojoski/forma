@@ -31,6 +31,21 @@ function renderDashboard() {
   setBar('stepsbar', steps / T.steps * 100);
   setText('dietPill', DIET_ICONS[cycle()] + ' ' + DIET[cycle()]);
 
+  // What is still missing today
+  const left = (id, text, cls = '') => {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'metric-left ' + cls;
+  };
+  const calLeft = state.calorieTarget - t.cal;
+  left('calorieLeft', calLeft >= 0 ? `${Math.round(calLeft).toLocaleString()} kcal left` : `${Math.round(-calLeft).toLocaleString()} kcal over target`, calLeft >= 0 ? 'done' : 'over');
+  const pLeft = T.protein - t.p;
+  left('proteinLeft', pLeft > 0 ? `${Math.round(pLeft)}g still to go` : '✓ Protein target hit', pLeft > 0 ? '' : 'done');
+  const wLeft = T.water - water;
+  left('waterLeft', wLeft > 0 ? `${(Math.round(wLeft * 100) / 100).toString()}L still to drink` : '✓ Hydrated', wLeft > 0 ? '' : 'done');
+  const sLeft = T.steps - steps;
+  left('stepsLeft', sLeft > 0 ? `${sLeft.toLocaleString()} steps to go` : '✓ Step goal reached', sLeft > 0 ? '' : 'done');
+
   renderDashboardDiary();
   renderTasks();
 }
@@ -96,9 +111,13 @@ function setSteps() {
 }
 
 // ---------- cumulative deficit ----------
-// Only days marked complete count; each day's maintenance uses the latest weigh in on or before it.
+// Past days count once marked complete; today always counts live ("so far").
+// Each day's maintenance uses the latest weigh in on or before it.
 function deficitModel() {
-  const dates = Object.keys(state.completedDays).filter((d) => state.completedDays[d] && d >= DIET_START && d <= today()).sort();
+  const now = today();
+  const dates = Object.keys(state.completedDays).filter((d) => state.completedDays[d] && d >= DIET_START && d < now);
+  if (now >= DIET_START) dates.push(now);
+  dates.sort();
   const weights = state.weights.slice().sort((a, b) => a.date.localeCompare(b.date));
   let total = 0;
   const points = [];
@@ -109,24 +128,32 @@ function deficitModel() {
     total += daily;
     points.push({ date, daily, total, predicted: PROFILE.startWeight - total / 7700 });
   }
-  return { points, total, predicted: PROFILE.startWeight - total / 7700 };
+  const todayPoint = points.find((p) => p.date === now);
+  return { points, total, today: todayPoint ? todayPoint.daily : 0, completed: points.length - (todayPoint ? 1 : 0), predicted: PROFILE.startWeight - total / 7700 };
 }
 
 function renderDeficit() {
-  const m = deficitModel(), n = m.points.length, fmt = (v) => Math.round(v).toLocaleString('en-US');
-  setText('deficitTotal', n ? (m.total >= 0 ? '+' : '') + fmt(m.total) + ' kcal' : '0 kcal');
-  setText('deficitCoverage', n + ' completed day' + (n === 1 ? '' : 's'));
-  setText('fatEquivalent', n ? (m.total >= 0 ? '−' : '+') + Math.abs(m.total / 7700).toFixed(2) + ' kg' : '0.00 kg');
-  setText('predictedWeight', (n ? m.predicted : PROFILE.startWeight).toFixed(2) + ' kg');
+  const m = deficitModel(), fmt = (v) => (v >= 0 ? '+' : '−') + Math.abs(Math.round(v)).toLocaleString('en-US') + ' kcal';
+  const todayDone = !!state.completedDays[today()];
+  setText('deficitTotal', fmt(m.total));
+  setText('deficitToday', fmt(m.today));
+  const done = m.completed + (todayDone ? 1 : 0);
+  setText('deficitCoverage', `${done} completed day${done === 1 ? '' : 's'}${todayDone ? '' : ' + today so far'}`);
+  setText('fatEquivalent', (m.total >= 0 ? '−' : '+') + Math.abs(m.total / 7700).toFixed(2) + ' kg');
+  setText('predictedWeight', m.predicted.toFixed(2) + ' kg');
   setText('deficitActualWeight', currentWeight().toFixed(1) + ' kg');
 
+  // Past days (before today) that were never marked complete
   let missing = 0;
-  if (n) for (let d = DIET_START; d <= today(); d = addDays(d, 1)) if (!state.completedDays[d]) missing++;
-  setText('deficitWarning', n
-    ? (missing ? `⚠ ${missing} day(s) not marked complete since Nov 1. The cumulative deficit leaves those days out, so the predicted weight is incomplete.` : 'All days marked complete since Nov 1. These are still estimates, not measured fat loss.')
-    : 'Mark a day as fully logged in Nutrition to begin your deficit chart. Partial days are left out so weight loss is not overstated.');
+  for (let d = DIET_START; d < today(); d = addDays(d, 1)) if (!state.completedDays[d]) missing++;
+  const todayNote = todayDone ? 'Today is marked complete.' : 'Today is still open, so its deficit will shrink as you log more food.';
+  setText('deficitWarning', missing
+    ? `⚠ ${missing} past day${missing === 1 ? '' : 's'} not marked complete, so ${missing === 1 ? 'it is' : 'they are'} left out. Mark them complete in Nutrition to include them. ${todayNote}`
+    : todayNote);
+  document.getElementById('deficitWarning').style.display = missing || !todayDone ? '' : 'none';
 
-  const labels = ['Nov 1', ...m.points.map((p) => p.date.slice(5))];
+  // Charts start from a zero point the day before the first counted day
+  const labels = [m.points.length ? addDays(m.points[0].date, -1).slice(5) : 'Start', ...m.points.map((p) => p.date.slice(5))];
   chart('deficitChart', 'line', labels, [
     { label: 'Cumulative deficit (kcal)', data: [0, ...m.points.map((p) => Math.round(p.total))], borderColor: '#21855c' },
   ]);

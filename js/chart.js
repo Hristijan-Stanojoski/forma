@@ -28,12 +28,13 @@ function chart(id, type, labels, datasets) {
 
   // Grid and y axis
   ctx.font = '11px system-ui'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  const step = (max - min) / 4, decimals = step >= 5 ? 0 : step >= .5 ? 1 : 2; // enough decimals that labels differ
   for (let i = 0; i <= 4; i++) {
-    const val = min + (max - min) * i / 4, yy = y(val);
+    const val = min + step * i, yy = y(val);
     ctx.strokeStyle = '#e8eee9'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(left, yy); ctx.lineTo(width - right, yy); ctx.stroke();
     ctx.fillStyle = '#84928b';
-    ctx.fillText(Math.abs(val) >= 1000 ? Math.round(val).toLocaleString('en-US') : Number(val.toFixed(1)).toString(), left - 8, yy);
+    ctx.fillText(Number(val.toFixed(decimals)).toLocaleString('en-US', { maximumFractionDigits: decimals }), left - 8, yy);
   }
 
   // X axis: first, middle and last label
