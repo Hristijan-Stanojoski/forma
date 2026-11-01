@@ -102,6 +102,8 @@
 .week-work{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;background:white;border:1px solid var(--line);border-radius:13px;padding:11px 15px;font-size:13px}
 .week-work-bar{flex:1 1 160px;height:8px;background:#edf3ef;border-radius:99px;overflow:hidden}
 .week-work-bar i{display:block;height:100%;background:var(--green);border-radius:99px}
+.time-examples{display:flex;flex-wrap:wrap;gap:6px}
+.time-examples span{background:#f1f6f3;border-radius:99px;padding:3px 10px;font-weight:700;color:var(--text);font-size:13px;white-space:nowrap}
 .quick-workday{display:flex;align-items:center;gap:7px;margin-top:8px}
 .quick-workday .field{padding:7px 9px;flex:1 1 90px;min-width:0}
 .quick-workday .btn{padding:8px 13px}

@@ -91,6 +91,25 @@ function renderSchedule() {
   document.getElementById('dietCycle').innerHTML = DIET.map((name, i) => `<div class="card">
       <span class="pill">Day ${i + 1}</span><h3>${DIET_ICONS[i]} ${name}</h3><p class="muted">${DIET_NOTES[i]}</p>
     </div>`).join('');
+  renderWorkdayCards();
+}
+
+// Workday rules, in the same card style as the diet cycle.
+function renderWorkdayCards() {
+  const ws = state.workSettings, wk = workWeekTotals(weekStartOf(today()));
+  const first = parseTime(ws.earliestStart), last = parseTime(ws.latestStart), len = ws.hoursPerDay * 60;
+  const examples = [];
+  for (let t = first; t <= last && examples.length < 5; t += 30) examples.push(`${fmtTime(t)} → ${fmtTime(t + len)}`);
+  const left = ws.weeklyTarget - wk.main;
+  const cards = [
+    ['Mon to Fri', `🕖 Start ${ws.earliestStart} to ${ws.latestStart}`, `Start any time in this window at ${escapeHTML(ws.job)}.`],
+    [`${ws.hoursPerDay}h days`, '⏱️ Finish times', `<span class="time-examples">${examples.map((x) => `<span>${x}</span>`).join('')}</span>`],
+    ['This week', `🎯 ${fmtHours(wk.main)} of ${ws.weeklyTarget}h`, left > 0 ? `${fmtHours(left)} left this week. ${wk.days} workday${wk.days === 1 ? '' : 's'} logged so far.` : `Target reached${left < 0 ? `, ${fmtHours(-left)} overtime` : ''}. ${wk.days} workdays logged.`],
+    ['End of day', '🤖 Log it with Claude', '"Log my workday, I started at 7:30 and finished at 15:45." Claude saves it and tells you your week total.'],
+  ];
+  document.getElementById('workdayCards').innerHTML = cards.map(([pill, title, text]) => `<div class="card">
+      <span class="pill">${pill}</span><h3>${title}</h3><p class="muted">${text}</p>
+    </div>`).join('');
 }
 
 function dayClasses(info) {
