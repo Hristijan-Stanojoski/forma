@@ -97,7 +97,7 @@ export async function workWeek(env, date) {
     week: `${start} to ${end}`, main_job: settings.job,
     main_job_hours: r2(main), target_hours: settings.weeklyTarget, remaining_hours: r2(Math.max(0, settings.weeklyTarget - main)),
     overtime_hours: r2(Math.max(0, main - settings.weeklyTarget)), all_jobs_hours: r2(total),
-    days: entries.sort((a, b) => a.date.localeCompare(b.date)).map((w) => ({ date: w.date, job: w.job, start: w.start || null, end: w.end || null, hours: w.hours, note: w.description || null })),
+    days: entries.sort((a, b) => a.date.localeCompare(b.date)).map((w) => ({ id: w.id, date: w.date, job: w.job, start: w.start || null, end: w.end || null, hours: w.hours, note: w.description || null })),
   };
 }
 const r2 = (x) => Math.round(x * 100) / 100;

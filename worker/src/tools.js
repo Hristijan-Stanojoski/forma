@@ -2,6 +2,7 @@
 // Tool arguments use AI friendly names (calories, protein_g, portion); storage keeps the
 // dashboard field names (cal, p, c, fat, qty, meal).
 import { getKey, getKeys, putKey } from './storage.js';
+import { LIFE_TOOLS, LIFE_TOOL_NAMES, callLifeTool } from './life.js';
 import { MEALS, START_KG, GOAL_KG, addDays, daySummary, fmtTime, loadFoods, newId, num, parseTime, resolveDate, targets, todayIn, workSettings, workWeek } from './diary.js';
 
 const dateProp = { type: 'string', description: 'YYYY-MM-DD, "today" or "yesterday". Defaults to today (Europe/Skopje).' };
@@ -13,7 +14,7 @@ const nutrientProps = {
   protein_g: { type: 'number' }, carbs_g: { type: 'number' }, fat_g: { type: 'number' },
 };
 
-export const TOOLS = [
+const DIARY_TOOLS = [
   {
     name: 'log_food',
     title: 'Log food or drinks',
@@ -102,11 +103,13 @@ export const TOOLS = [
   {
     name: 'get_progress',
     title: 'Get progress overview',
-    description: 'Weight history, latest weight, goal, targets and the last 7 days of calories. Use for questions like "how am I doing this week".',
+    description: 'Weight history, body measurements, latest weight, goal, targets and the last 7 days of calories. Use for questions like "how am I doing this week".',
     inputSchema: { type: 'object', properties: {} },
     annotations: { readOnlyHint: true },
   },
 ];
+
+export const TOOLS = [...DIARY_TOOLS, ...LIFE_TOOLS];
 
 function foodFields(it, f) {
   if (it.name !== undefined) f.name = String(it.name).slice(0, 120);
@@ -218,16 +221,17 @@ export async function callTool(env, name, a = {}) {
     case 'get_progress': {
       const today = todayIn(env);
       const dates = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
-      const rows = await getKeys(env, ['weights', ...dates.map((d) => 'foods:' + d)]);
+      const rows = await getKeys(env, ['weights', 'measurements', ...dates.map((d) => 'foods:' + d)]);
       const weights = rows.weights || [];
       const last7 = dates.map((date) => {
         const foods = rows['foods:' + date] || [];
         return { date, calories: Math.round(foods.reduce((s, f) => s + Number(f.cal || 0), 0)), entries: foods.length };
       });
       const latest = weights.length ? weights[weights.length - 1].value : START_KG;
-      return { start_kg: START_KG, goal_kg: GOAL_KG, latest_kg: latest, weights: weights.slice(-30), targets: await targets(env), last_7_days: last7 };
+      return { start_kg: START_KG, goal_kg: GOAL_KG, latest_kg: latest, weights: weights.slice(-30), measurements_cm: (rows.measurements || []).slice(-12), targets: await targets(env), last_7_days: last7 };
     }
     default:
+      if (LIFE_TOOL_NAMES.has(name)) return callLifeTool(env, name, a);
       throw new Error('Unknown tool: ' + name);
   }
 }

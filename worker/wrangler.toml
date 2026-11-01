@@ -6,6 +6,7 @@ preview_urls = false
 
 [vars]
 TIMEZONE = "Europe/Skopje"
+MKD_PER_EUR = "61.5"   # vendor rate used to convert denars to EUR
 
 [[d1_databases]]
 binding = "DB"

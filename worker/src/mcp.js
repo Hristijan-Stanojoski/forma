@@ -2,13 +2,16 @@
 import { json, cors } from './http.js';
 import { TOOLS, callTool } from './tools.js';
 
-const SERVER = { name: 'forma', version: '1.1.0' };
+const SERVER = { name: 'forma', version: '1.2.0' };
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const INSTRUCTIONS =
   'Forma is Hristijan\'s personal fitness diary (goal: 100 kg to 80 kg, Modified UN diet four day rotation). ' +
   'When the user describes what they ate or drank, estimate calories and macros yourself and call log_food. ' +
   'Dates are Europe/Skopje local time. Always report what you logged and the remaining calories for the day. ' +
-  'When the user says when they started and finished work, call log_workday and report the day\'s hours and the week total.';
+  'When the user says when they started and finished work, call log_workday and report the day\'s hours and the week total. ' +
+  'Everything else in the app can be logged too: body measurements, the daily checklist, gym sessions, home tasks, schedule plans, side job hours, ' +
+  'spending and income (EUR; pass currency MKD for denars), Upwork and bank balances, the grocery list and food favorites. ' +
+  'Whenever the user mentions any of these, use the matching tool instead of asking them to enter it manually, then confirm what changed.';
 
 async function handleRpc(env, msg) {
   const { id, method, params } = msg || {};
