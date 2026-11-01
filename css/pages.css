@@ -215,6 +215,12 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
 .module-item.task .task-status{border:0;background:none;font-size:22px;line-height:1;color:#9aa69f;cursor:pointer;padding:0 2px;width:30px;flex-shrink:0}
 .module-item.task.doing .task-status{color:#e6a04d}
 .module-item.task.done .task-status{color:var(--green)}
+.task-edit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:14px;background:#f8fbf9;border:1px solid #cfe9db;border-radius:12px}
+.task-edit label{display:grid;gap:4px;min-width:0;font-size:11px;font-weight:700;color:#697870}
+.task-edit .field{width:100%}
+.btn.danger{color:#a45b4a}
+.task-open{cursor:pointer}
+.module-item.task .task-edit-btn{background:#eef4f0;color:#5d6f65}
 .module-item.task.done b{text-decoration:line-through;color:var(--muted)}
 .module-item.task.overdue small{color:#a35a14}
 .grocery-total{font-weight:750;text-align:right;margin-top:12px}
@@ -249,6 +255,8 @@ details.mini summary{cursor:pointer;color:var(--green);font-weight:700;font-size
   .balance-grid{grid-template-columns:1fr}
   .work-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   #workTaskForm #wtTitle,#workTaskForm .field{flex:none}
+  .task-edit{grid-template-columns:1fr 1fr}
+  .task-edit label:nth-child(4){grid-column:1/-1}
   #projectHoursForm{display:grid;grid-template-columns:1fr 1fr;gap:9px}
   #projectHoursForm .time-field:nth-child(n+3),#projectHoursForm .btn{grid-column:1/-1}
   .module-form .field{width:100%}

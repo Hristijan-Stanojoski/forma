@@ -2,7 +2,7 @@
 // Network first (revalidated, so a new deploy shows up on the next load), cached copy when offline.
 // Only same origin GETs are handled; API calls to the Worker always go straight to the network.
 
-const CACHE = 'forma-shell-v5';
+const CACHE = 'forma-shell-v6';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png',
   'css/base.css', 'css/nav.css', 'css/dashboard.css', 'css/pages.css',

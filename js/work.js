@@ -123,6 +123,36 @@ function cycleWorkTask(id) {
   persist();
   render();
 }
+// Editing a task in place: title, due date, status and project.
+let editingTaskId = null, doneTasksOpen = false;
+function startTaskEdit(id) {
+  editingTaskId = id;
+  renderWork();
+  const input = document.querySelector('#taskEdit [name=title]');
+  if (input) { input.focus(); input.select(); }
+}
+function cancelTaskEdit() {
+  editingTaskId = null;
+  renderWork();
+}
+function saveWorkTask(e, id) {
+  e.preventDefault();
+  const t = state.workTasks.find((x) => x.id === id), f = e.target;
+  if (!t) { cancelTaskEdit(); return; }
+  const title = f.title.value.trim();
+  if (!title) { alert('A task needs a name.'); return; }
+  t.title = title;
+  t.due = f.due.value;
+  if (t.status !== f.status.value) {
+    t.status = f.status.value;
+    if (t.status === 'done') t.doneAt = today(); else delete t.doneAt;
+  }
+  t.project = f.project.value;
+  editingTaskId = null;
+  persist();
+  render();
+}
+
 function deleteWorkTask(id) {
   const t = state.workTasks.find((x) => x.id === id);
   if (!t || !confirm(`Delete the task "${t.title}"?`)) return;
@@ -132,14 +162,30 @@ function deleteWorkTask(id) {
 }
 
 // ---------- rendering ----------
+function taskEditHTML(t) {
+  const option = (value, label, current) => `<option value="${value}"${value === current ? ' selected' : ''}>${escapeHTML(label)}</option>`;
+  return `<form class="task-edit" id="taskEdit" onsubmit="saveWorkTask(event,${Number(t.id)})">
+      <label style="grid-column:1/-1">Task<input class="field" name="title" value="${escapeHTML(t.title)}" required maxlength="140"></label>
+      <label>Due date<input class="field" name="due" type="date" value="${escapeHTML(t.due || '')}"></label>
+      <label>Status<select class="field" name="status">${Object.entries(TASK_STATUS).map(([k, [, label]]) => option(k, label, t.status)).join('')}</select></label>
+      <label>Project<select class="field" name="project">${PROJECTS.map((p) => option(p.key, p.name, t.project)).join('')}</select></label>
+      <div class="food-edit-actions" style="grid-column:1/-1">
+        <button class="btn" type="submit">Save</button>
+        <button class="btn outline" type="button" onclick="cancelTaskEdit()">Cancel</button>
+        <button class="btn outline danger" type="button" onclick="deleteWorkTask(${Number(t.id)})">Delete</button>
+      </div></form>`;
+}
+
 function taskHTML(t, hours) {
+  if (t.id === editingTaskId) return taskEditHTML(t);
   const [icon, label] = TASK_STATUS[t.status] || TASK_STATUS.todo;
   const overdue = t.status !== 'done' && t.due && t.due < today();
   const meta = [label, t.due ? `${overdue ? '⚠ ' : ''}Due ${formatDate(t.due, { month: 'short', day: 'numeric' })}` : '', hours ? fmtHours(hours) + ' logged' : '',
     t.doneAt ? 'Done ' + formatDate(t.doneAt, { month: 'short', day: 'numeric' }) : ''].filter(Boolean).join(' · ');
   return `<div class="module-item task ${t.status}${overdue ? ' overdue' : ''}">
       <button class="task-status" onclick="cycleWorkTask(${Number(t.id)})" title="Change status" aria-label="Change status, now ${label}">${icon}</button>
-      <div class="module-copy"><b>${escapeHTML(t.title)}</b><small>${meta}</small></div>
+      <div class="module-copy task-open" onclick="startTaskEdit(${Number(t.id)})" title="Edit task"><b>${escapeHTML(t.title)}</b><small>${meta}</small></div>
+      <button class="task-edit-btn" onclick="startTaskEdit(${Number(t.id)})" aria-label="Edit task" title="Edit">✎</button>
       <button onclick="deleteWorkTask(${Number(t.id)})" aria-label="Delete task">✕</button></div>`;
 }
 
@@ -192,10 +238,22 @@ function renderWork() {
   const byDue = (a, b) => (a.due || '9999').localeCompare(b.due || '9999') || a.id - b.id;
   const open = [...tasks.filter((t) => t.status === 'doing').sort(byDue), ...tasks.filter((t) => t.status === 'todo').sort(byDue)];
   const finished = tasks.filter((t) => t.status === 'done').sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
+  // A sync can re-render while you edit: keep what you typed and where the cursor was.
+  const draftForm = document.getElementById('taskEdit');
+  const draft = draftForm && Object.fromEntries(['title', 'due', 'status', 'project'].map((n) => [n, draftForm[n].value]));
+  const focused = draftForm && draftForm.contains(document.activeElement) ? document.activeElement.name : null;
+  if (editingTaskId && !tasks.some((t) => t.id === editingTaskId)) editingTaskId = null;
+  if (editingTaskId && (tasks.find((t) => t.id === editingTaskId) || {}).status === 'done') doneTasksOpen = true;
   document.getElementById('workTaskList').innerHTML = (open.length
     ? open.map((t) => taskHTML(t, hoursByTask[t.id])).join('')
     : `<p class="muted">${tasks.length ? 'Everything is done. Nice work!' : `No tasks for ${escapeHTML(p.name)} yet. Add the first one above.`}</p>`)
-    + (finished.length ? `<details class="mini"><summary>${finished.length} done</summary><div class="module-list" style="margin-top:8px">${finished.map((t) => taskHTML(t, hoursByTask[t.id])).join('')}</div></details>` : '');
+    + (finished.length ? `<details class="mini"${doneTasksOpen ? ' open' : ''} ontoggle="doneTasksOpen=this.open"><summary>${finished.length} done</summary><div class="module-list" style="margin-top:8px">${finished.map((t) => taskHTML(t, hoursByTask[t.id])).join('')}</div></details>` : '');
+
+  const form = document.getElementById('taskEdit');
+  if (form && draft) {
+    for (const [n, v] of Object.entries(draft)) form[n].value = v;
+    if (focused) form[focused].focus();
+  }
 
   // History for this project, plus work that is not in any project (e.g. a client logged through Claude)
   const taskName = (id) => (state.workTasks.find((t) => t.id === id) || {}).title;
