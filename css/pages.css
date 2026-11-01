@@ -1,0 +1,67 @@
+/* Nutrition */
+.foodlist{display:grid;gap:8px}
+.fooditem{display:flex;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
+.fooditem>div:first-child{min-width:0;overflow-wrap:anywhere}
+.fooditem>div:last-child{white-space:nowrap}
+.fooditem small{color:var(--muted)}
+.fooditem button{background:transparent;border:0;color:#bd6b64}
+
+/* Training and schedule */
+.workouts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.workouts .card h3{margin-top:0}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{padding:14px 7px;border:1px solid var(--line);border-radius:12px;background:white;text-align:center}
+.day strong{display:block}
+.day small{color:var(--muted)}
+.day.today{border:2px solid var(--green);background:var(--light)}
+
+/* Progress */
+.measure-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.measure-stat{background:#f5f8f6;border-radius:12px;padding:14px}
+.measure-stat small{display:block;color:#78877f}
+.measure-stat strong{display:block;font-size:21px;margin-top:5px}
+.measure-help{font-size:12px;color:#78877f}
+.measure-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.measure-form label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#697870}
+.measure-form input{width:100%}
+.measure-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#64756a}
+.measure-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px}
+.adaptive{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.adaptive>div{background:#f5f8f6;padding:14px;border-radius:12px}
+.adaptive b{display:block;font-size:20px}
+
+/* Home, work and finance modules */
+.module-hero{background:linear-gradient(125deg,#153e2d,#246947);color:#fff;border-radius:20px;padding:26px;margin-bottom:18px}
+.module-hero .eyebrow{color:#a9e8bf}
+.module-hero h2{font-size:27px;margin:7px 0}
+.module-hero p{color:#d5e9dc;margin:0}
+.module-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.module-stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+.module-stat small{display:block;color:var(--muted)}
+.module-stat strong{font-size:25px}
+.module-form{display:flex;flex-wrap:wrap;gap:9px}
+.module-form .field{min-width:125px}
+.module-list{display:grid;gap:9px}
+.module-item{display:flex;align-items:center;gap:10px;background:#f7faf8;border:1px solid var(--line);border-radius:12px;padding:12px}
+.module-item .module-copy{flex:1;min-width:0;overflow-wrap:anywhere}
+.module-item small{display:block;color:var(--muted)}
+.module-item input[type=checkbox]{width:19px;height:19px;accent-color:var(--green)}
+.module-item.done .module-copy{text-decoration:line-through;opacity:.55}
+.module-item button{border:0;background:#fceeee;color:#a34848;border-radius:8px;padding:7px 10px}
+.grocery-total{font-weight:750;text-align:right;margin-top:12px}
+.expense-row{margin:12px 0}
+.expense-row .expense-meta{display:flex;justify-content:space-between;font-size:12px}
+.expense-track{height:9px;background:#edf3ef;border-radius:99px;margin-top:5px;overflow:hidden}
+.expense-track i{display:block;height:100%;background:var(--green)}
+
+@media(max-width:720px){
+  .workouts{grid-template-columns:1fr}
+  .days{grid-template-columns:repeat(4,1fr)}
+  .measure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .measure-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .adaptive{grid-template-columns:1fr}
+  .module-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .module-form{flex-direction:column}
+  .module-form .field{width:100%}
+  .module-hero{padding:20px}
+}

@@ -1,0 +1,34 @@
+/* Desktop sidebar */
+.sidebar{width:238px;background:white;border-right:1px solid var(--line);padding:30px 17px;position:sticky;top:0;height:100vh;flex-shrink:0}
+.brand{font-size:25px;font-weight:850;letter-spacing:-1.2px;padding:0 12px 38px}
+.brand span{color:var(--green)}
+.nav{display:grid;gap:5px}
+.nav button{width:100%;border:0;background:transparent;color:#697870;padding:12px 14px;text-align:left;border-radius:11px;font-weight:650}
+.nav button.active{background:var(--light);color:var(--green)}
+.nav button span{display:inline-block;width:28px;font-size:18px}
+.sidebar-bottom{position:absolute;bottom:26px;left:26px;right:17px;color:var(--muted);font-size:12px}
+
+/* Mobile: header menu plus scrollable bottom tabs */
+.mobilebar{display:none}
+.mobile-menu-details{display:none;position:relative;z-index:9999;margin-left:auto;margin-right:10px}
+.mobile-menu-check{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.mobile-menu-label{display:block;touch-action:manipulation;list-style:none;cursor:pointer;user-select:none;border:1px solid var(--line);background:white;border-radius:11px;padding:10px 13px;font-weight:750;color:var(--dark);white-space:nowrap}
+.mobile-menu-panel{position:absolute;right:0;top:calc(100% + 9px);width:min(310px,calc(100vw - 30px));background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 40px #102d2338;padding:10px;grid-template-columns:1fr 1fr;gap:7px}
+.mobile-menu-panel a{display:block;min-height:46px;border-radius:10px;background:#f4f8f5;text-align:left;padding:13px 10px;color:var(--dark);font-weight:700;text-decoration:none}
+.mobile-menu-panel a.active{background:var(--light);color:var(--green)}
+.mobile-menu-panel a:active,.mobile-menu-panel a:focus-visible{background:#d9f1e5;outline:2px solid #23815f}
+/* The checkbox drives the panel, which works in restricted mobile HTML viewers too */
+.mobile-menu-details > .mobile-menu-panel{display:none}
+.mobile-menu-details > .mobile-menu-check:checked ~ .mobile-menu-panel{display:grid}
+
+@media(max-width:1050px){
+  .sidebar{width:190px}
+}
+@media(max-width:720px){
+  .sidebar{display:none}
+  .mobile-menu-details{display:block}
+  .mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:9;background:#fff;border-top:1px solid var(--line);overflow-x:auto;justify-content:flex-start;gap:4px;padding:8px 8px max(10px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+  .mobilebar button{flex:0 0 calc((100% - 20px)/5);min-width:58px;padding:3px 0;background:none;border:0;color:#7a8980;font-size:10px;display:grid;gap:3px;place-items:center}
+  .mobilebar button span{font-size:19px}
+  .mobilebar button.active{color:var(--green)}
+}

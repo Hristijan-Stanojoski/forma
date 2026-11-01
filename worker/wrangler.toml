@@ -1,0 +1,15 @@
+name = "forma-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[vars]
+TIMEZONE = "Europe/Skopje"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "forma"
+database_id = "f5e0fe67-924c-4c1b-bdcf-65e83b86b4dd"
+
+# Secret (not stored here): FORMA_KEY, set with `wrangler secret put FORMA_KEY`

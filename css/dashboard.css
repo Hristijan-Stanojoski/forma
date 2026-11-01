@@ -1,0 +1,101 @@
+/* Goal hero */
+.hero{background:var(--dark);color:white;border-radius:22px;padding:27px 31px;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;position:relative;overflow:hidden}
+.hero:after{content:'';position:absolute;width:350px;height:350px;border:1px solid #ffffff12;border-radius:50%;right:-100px;top:-160px}
+.hero small{color:#b0d3c0}
+.hero h2{font-size:35px;margin:6px 0 7px;letter-spacing:-1.2px}
+.hero p{color:#b8d3c4;margin:0}
+.hero-progress{margin-top:24px}
+.hero-metrics{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#d5e9dc;font-size:12px}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:center}
+.goal-stat{background:#ffffff12;border:1px solid #ffffff15;border-radius:14px;padding:17px}
+.goal-stat strong{display:block;font-size:27px}
+.goal-stat small{font-size:12px}
+
+.insight{margin-top:16px;background:#fff8e9;border:1px solid #f1d9a7;border-radius:12px;padding:13px 16px;color:#6c522b}
+.insight.good{background:#eaf7ee;border-color:#cde8d4;color:#205b3e}
+.insight strong{display:block;margin-bottom:4px}
+.insight small{display:block;line-height:1.55}
+
+/* Metric cards */
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.metric .ico{font-size:21px}
+.metric .label{color:#78877f;font-size:12px;font-weight:700;margin-top:11px}
+.metric strong{font-size:27px;letter-spacing:-.8px}
+.metric small{color:var(--muted)}
+.metric .track{height:7px;background:#edf2ee;border-radius:10px;overflow:hidden;margin-top:14px}
+.metric .track i{height:100%;background:var(--green);display:block;border-radius:10px}
+
+/* Today's food diary */
+.daily-feature{margin-top:18px;border-color:#d8e9dd}
+.daily-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.daily-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-top:18px}
+.daily-summary>div{background:#f3f8f4;padding:13px;border-radius:12px;min-width:0}
+.daily-summary small{display:block;color:#73867a;font-size:11px}
+.daily-summary strong{display:block;font-size:23px;letter-spacing:-.7px;overflow-wrap:anywhere}
+.diary-track{height:10px;background:#e9f0eb;border-radius:20px;overflow:hidden;margin:15px 0 18px}
+.diary-track i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.diary-meals{display:grid;gap:12px}
+.diary-group{border:1px solid #e5ede7;border-radius:13px;overflow:hidden}
+.diary-group-head{display:flex;justify-content:space-between;gap:10px;background:#f6f9f7;padding:12px 14px}
+.diary-group-head b{font-size:14px}
+.diary-entry{display:flex;justify-content:space-between;gap:12px;padding:9px 14px;border-top:1px solid #edf2ee;font-size:13px}
+.diary-entry small{color:#73867a}
+.diary-entry strong{white-space:nowrap}
+.diary-empty{padding:20px;color:#78877f;background:#f6f9f7;border-radius:12px}
+
+/* Checklist */
+.quick{display:grid;gap:12px}
+.task{display:flex;align-items:center;gap:12px;padding:12px;background:#f8faf8;border-radius:11px}
+.task input{accent-color:var(--green);width:17px;height:17px}
+.task div{flex:1}
+.task small{display:block;color:var(--muted)}
+
+/* Cumulative deficit */
+.deficit-feature{margin-top:22px}
+.deficit-top{display:flex;justify-content:space-between;align-items:start;gap:15px;flex-wrap:wrap}
+.deficit-number{font-size:clamp(29px,5vw,43px);font-weight:850;letter-spacing:-1.5px;line-height:1.1;color:var(--dark)}
+.deficit-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0}
+.deficit-cards>div{background:#f5f8f6;border-radius:12px;padding:13px}
+.deficit-cards small{display:block;color:var(--muted);font-size:11px}
+.deficit-cards strong{display:block;font-size:20px;margin-top:5px}
+.deficit-graphs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.deficit-graphs .chartwrap{height:220px}
+.deficit-hint{color:var(--muted);font-size:12px;line-height:1.6;margin-top:12px}
+.deficit-empty{padding:10px 13px;border-radius:10px;background:#fff8e9;color:#765b30;font-size:12px;margin-top:12px}
+
+/* Meal and quick food cards (also used on Nutrition) */
+.mealgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.meal{padding:0;overflow:hidden}
+.meal img{width:100%;height:135px;object-fit:cover;display:block;background:#e9f0eb}
+.meal .content{padding:14px}
+.meal .content strong{font-size:14px}
+.meal .content p{margin:4px 0 9px;color:var(--muted);font-size:12px}
+.meal .content .bottom{display:flex;justify-content:space-between;align-items:center}
+.meal .content b{font-size:13px}
+
+@media(max-width:1050px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .mealgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){
+  .daily-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .deficit-cards{grid-template-columns:1fr 1fr}
+  .deficit-graphs{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .hero{grid-template-columns:1fr;padding:23px}
+  .hero h2{font-size:29px}
+  .goal-stat strong{font-size:23px}
+  .metrics{gap:9px}
+  .metric strong{font-size:23px}
+  .mealgrid{grid-template-columns:1fr 1fr;gap:9px}
+  .meal img{height:110px}
+  .meal .content{padding:11px}
+}
+@media(max-width:500px){
+  .daily-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .daily-summary strong{font-size:21px}
+  .daily-feature{padding:15px}
+}

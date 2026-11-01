@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Forma</title>
+  <meta name="description" content="Personal fitness, nutrition, home, work and finance dashboard.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#102d23">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Forma">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">forma<span>.</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-bottom">✦ Your progress, one day at a time.<br><span id="syncBadge">Saved on this device</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div>
+        <div class="eyebrow">YOUR FITNESS JOURNEY</div>
+        <h1 id="pageTitle">Overview Dashboard</h1>
+        <p class="sub" id="pageSub">Small actions. Big changes. Every day.</p>
+      </div>
+      <div class="mobile-menu-details">
+        <input type="checkbox" id="mobileMenuCheck" class="mobile-menu-check" aria-label="Toggle navigation">
+        <label for="mobileMenuCheck" class="mobile-menu-label">☰ Menu</label>
+        <nav class="mobile-menu-panel" id="mobileMenuPanel" aria-label="All pages"></nav>
+      </div>
+      <div class="avatar">HS</div>
+    </header>
+
+    <!-- ===================== Dashboard ===================== -->
+    <section class="page active" id="dashboard">
+      <div class="hero">
+        <div>
+          <small>YOUR BIG GOAL</small>
+          <h2>Road to 80 kg 🎯</h2>
+          <p>Every healthy choice moves you closer.</p>
+          <div class="hero-progress">
+            <div class="bar"><i id="goalbar"></i></div>
+            <div class="hero-metrics"><span>Started at 100 kg</span><span id="goalpercent">0% complete</span><span>Goal: 80 kg</span></div>
+          </div>
+        </div>
+        <div class="goal-grid">
+          <div class="goal-stat"><small>Current weight</small><strong id="currentWeight">100 kg</strong></div>
+          <div class="goal-stat"><small>Remaining</small><strong id="remaining">20 kg</strong></div>
+        </div>
+      </div>
+      <div id="weightInsight" class="insight good" role="status"></div>
+
+      <div class="card daily-feature">
+        <div class="daily-heading">
+          <div>
+            <div class="eyebrow">YOUR FOOD DIARY · <span id="diaryDate"></span></div>
+            <h2 style="margin:5px 0 3px">Today's nutrition</h2>
+            <p class="muted" style="margin:0" id="diarySub">Actual logged meals and drinks</p>
+          </div>
+          <span class="pill" id="diaryStatus">Logging in progress</span>
+        </div>
+        <div class="daily-summary">
+          <div><small>Consumed</small><strong id="diaryCalories">0</strong><small>kcal</small></div>
+          <div><small>Remaining</small><strong id="diaryRemaining">0</strong><small>kcal</small></div>
+          <div><small>Protein</small><strong id="diaryProtein">0g</strong></div>
+          <div><small>Carbs</small><strong id="diaryCarbs">0g</strong></div>
+          <div><small>Fat</small><strong id="diaryFat">0g</strong></div>
+          <div><small>Water</small><strong id="diaryWater">0ml</strong></div>
+        </div>
+        <div class="diary-track"><i id="diaryBar"></i></div>
+        <div class="sectionhead" style="margin:0 0 12px"><h3>Logged meals & drinks</h3><a onclick="go('nutrition')">Edit food log →</a></div>
+        <div id="dashboardMeals" class="diary-meals"></div>
+        <p class="note" id="diaryNote"></p>
+      </div>
+
+      <div class="sectionhead"><h3>Today's overview</h3><span class="pill" id="dietPill"></span></div>
+      <div class="metrics">
+        <div class="card metric"><div class="ico">🔥</div><div class="label">CALORIES EATEN</div><div><strong id="calorieMetric">0</strong><small id="calorieLimitLabel"></small></div><div class="track"><i id="calbar"></i></div></div>
+        <div class="card metric"><div class="ico">💪</div><div class="label">PROTEIN</div><div><strong id="proteinMetric">0g</strong><small id="proteinTargetLabel"></small></div><div class="track"><i id="probar"></i></div></div>
+        <div class="card metric"><div class="ico">💧</div><div class="label">WATER</div><div><strong id="waterMetric">0L</strong><small id="waterTargetLabel"></small></div><div class="track"><i id="waterbar"></i></div></div>
+        <div class="card metric"><div class="ico">👟</div><div class="label">STEPS</div><div><strong id="stepsMetric">0</strong><small id="stepsTargetLabel"></small></div><div class="track"><i id="stepsbar"></i></div></div>
+      </div>
+
+      <div class="sectionhead"><h3>Progress insights</h3><a onclick="go('progress')">View analytics →</a></div>
+      <div class="twocol">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b>Weight journey</b><span class="pill">Goal: 80 kg</span></div>
+          <div class="chartwrap"><canvas id="weightChart"></canvas></div>
+        </div>
+        <div class="card">
+          <b>Today's checklist</b>
+          <p class="muted">Stay consistent with the basics.</p>
+          <div class="quick" id="tasks"></div>
+        </div>
+      </div>
+
+      <div class="card deficit-feature">
+        <div class="deficit-top">
+          <div>
+            <div class="label">🔥 CUMULATIVE CALORIE DEFICIT</div>
+            <div class="deficit-number" id="deficitTotal">0 kcal</div>
+            <p class="muted" style="margin:5px 0 0">From Nov 1, 2026 · estimated from completed food logs</p>
+          </div>
+          <span class="pill" id="deficitCoverage">No completed days</span>
+        </div>
+        <div class="deficit-cards">
+          <div><small>Estimated fat equivalent</small><strong id="fatEquivalent">0.00 kg</strong></div>
+          <div><small>Predicted weight</small><strong id="predictedWeight">100.00 kg</strong></div>
+          <div><small>Latest actual weight</small><strong id="deficitActualWeight">100.0 kg</strong></div>
+        </div>
+        <div class="deficit-graphs">
+          <div><b>Cumulative energy balance</b><div class="chartwrap"><canvas id="deficitChart"></canvas></div></div>
+          <div><b>Predicted vs actual weight</b><div class="chartwrap"><canvas id="predictedChart"></canvas></div></div>
+        </div>
+        <div id="deficitWarning" class="deficit-empty"></div>
+        <p class="deficit-hint">Estimates only. The model uses a sedentary energy expenditure estimate and a rough 7,700 kcal per kg conversion. Food measurement, changing activity, water retention and creatine can all move your actual weight. Days that are not marked complete are left out, not counted as zero food.</p>
+      </div>
+
+      <div class="sectionhead"><h3>Today's meal inspiration</h3><a onclick="go('nutrition')">Open food tracker →</a></div>
+      <div class="mealgrid" id="mealCards"></div>
+    </section>
+
+    <!-- ===================== Nutrition ===================== -->
+    <section class="page" id="nutrition">
+      <div class="hero" style="grid-template-columns:1fr">
+        <div><small>MODIFIED UN DIET</small><h2 id="dietName">Protein day</h2><p>Four day rotation • Log every meal, coffee and lemonade.</p></div>
+      </div>
+
+      <div class="sectionhead"><h3>Log food & drinks</h3><span class="pill" id="remainingCal"></span></div>
+      <div class="card" style="margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="dayComplete" onchange="completeDay(this.checked)">
+          <span><b>All food and drinks logged for today</b><br><small class="muted">Only completed days count toward the estimated deficit. You can still edit food later.</small></span>
+        </label>
+      </div>
+      <div class="card">
+        <form onsubmit="event.preventDefault();addFood()">
+          <div class="formrow">
+            <input class="field" id="foodName" placeholder="Food or drink (e.g. Nescafé with milk)" autocomplete="off">
+            <input class="field" id="foodQty" placeholder="Portion (e.g. 150 g)" autocomplete="off">
+            <select class="field" id="foodMeal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option><option>Drinks</option></select>
+          </div>
+          <div class="formrow" style="margin-top:10px">
+            <input class="field" id="foodCal" type="number" min="0" inputmode="decimal" placeholder="Calories">
+            <input class="field" id="foodProtein" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Protein (g)">
+            <input class="field" id="foodCarbs" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Carbs (g)">
+            <input class="field" id="foodFat" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Fat (g)">
+            <button class="btn" type="submit">+ Add food</button>
+          </div>
+        </form>
+        <p class="note">Log actual portions. Or just tell Claude or ChatGPT what you ate and it logs everything for you (set it up in Settings).</p>
+        <div class="sectionhead"><h3>Today's entries</h3><b id="nutritionTotal">0 kcal</b></div>
+        <div class="foodlist" id="foodList"></div>
+      </div>
+
+      <div class="sectionhead"><h3>Quick add favorites</h3></div>
+      <div class="mealgrid" id="quickFoods"></div>
+
+      <div class="card" style="margin-top:16px">
+        <b>November 1 · Day 1 (Protein)</b>
+        <p class="muted">Import or review the first day meal and drink entries. The salmon bowl ingredients are stored one by one so you can correct them later.</p>
+        <button class="btn secondary" onclick="importNov1()">Import / reconcile Nov 1 entries</button>
+        <p class="note" id="nov1Summary"></p>
+      </div>
+    </section>
+
+    <!-- ===================== Training ===================== -->
+    <section class="page" id="training">
+      <div class="sectionhead"><h3>Your 4 day gym routine</h3><span class="pill">Beginner ramp up</span></div>
+      <div class="workouts" id="workoutCards"></div>
+      <div class="card" style="margin-top:14px">
+        <b>How to progress</b>
+        <p class="muted" style="margin:6px 0 0">When you hit the top of the rep range on every set with good form, add the smallest weight step next session (about 2.5 kg for machines and lower body, 1 to 2 kg for dumbbells). For the first two weeks, keep loads light and focus on technique.</p>
+      </div>
+    </section>
+
+    <!-- ===================== Progress ===================== -->
+    <section class="page" id="progress">
+      <div class="metrics">
+        <div class="card metric"><div class="label">CURRENT WEIGHT</div><strong id="progressWeight">100 kg</strong></div>
+        <div class="card metric"><div class="label">TARGET WEIGHT</div><strong>80 kg</strong></div>
+        <div class="card metric"><div class="label">LOST SO FAR</div><strong id="lostWeight">0 kg</strong></div>
+        <div class="card metric"><div class="label">REMAINING</div><strong id="progressRemaining">20 kg</strong></div>
+      </div>
+
+      <div class="sectionhead"><h3>Weight check in</h3></div>
+      <div class="card">
+        <form class="formrow" onsubmit="event.preventDefault();saveWeight()">
+          <input class="field" type="number" id="weightInput" min="30" max="300" step="0.1" inputmode="decimal" placeholder="Today's weight (kg)">
+          <button class="btn" type="submit">Save weigh in</button>
+        </form>
+        <p class="note">One weigh in per day; saving again replaces today's. Creatine can temporarily increase water weight.</p>
+      </div>
+
+      <div class="sectionhead"><h3>Body measurements</h3><span class="pill">Weekly check in</span></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="measure-grid">
+          <div class="measure-stat"><small>Weight</small><strong id="measureWeight">100.0 kg</strong></div>
+          <div class="measure-stat"><small>Belly circumference</small><strong id="measureBelly">— cm</strong></div>
+          <div class="measure-stat"><small>Left biceps</small><strong id="measureLeft">— cm</strong></div>
+          <div class="measure-stat"><small>Right biceps</small><strong id="measureRight">— cm</strong></div>
+        </div>
+        <p class="measure-help">Measure your belly at the same spot just below your belly button, relaxed, after exhaling normally. Measure both arms at the same midpoint and in the same relaxed position each week.</p>
+        <div class="measure-form">
+          <label>Date<input class="field" type="date" id="measurementDate"></label>
+          <label>Belly (cm)<input class="field" type="number" min="30" max="250" step="0.1" inputmode="decimal" id="bellyInput" placeholder="e.g. 105.5"></label>
+          <label>Left biceps (cm)<input class="field" type="number" min="15" max="100" step="0.1" inputmode="decimal" id="leftArmInput" placeholder="e.g. 35"></label>
+          <label>Right biceps (cm)<input class="field" type="number" min="15" max="100" step="0.1" inputmode="decimal" id="rightArmInput" placeholder="e.g. 35"></label>
+        </div>
+        <div style="margin-top:12px"><button class="btn" onclick="saveMeasurements()">Save weekly measurements</button></div>
+        <p class="note" id="measurementStatus"></p>
+      </div>
+
+      <div class="sectionhead"><h3>Weight & body size trends</h3></div>
+      <div class="card">
+        <p class="measure-help">All four lines show the percentage change from their own first value, so kg and cm can be compared fairly. Below 0% means smaller than your baseline.</p>
+        <div class="chartwrap" style="height:275px"><canvas id="bodyChart"></canvas></div>
+      </div>
+
+      <div class="sectionhead"><h3>Adaptive calorie guidance</h3></div>
+      <div class="card">
+        <p class="muted">Your target is reviewed as your weight changes, not cut automatically after a single weigh in.</p>
+        <div class="adaptive">
+          <div><small>Current daily target</small><b id="adaptiveTarget"></b></div>
+          <div><small>Estimated maintenance</small><b id="maintenanceEstimate"></b></div>
+          <div><small>Suggested next action</small><b id="adjustmentStatus" style="font-size:14px"></b></div>
+        </div>
+        <p class="note" id="adaptiveExplanation"></p>
+        <div id="weeklyWeightInsight" class="insight good"></div>
+      </div>
+
+      <div class="sectionhead"><h3>Weight trend</h3></div>
+      <div class="card"><div class="chartwrap"><canvas id="progressChart"></canvas></div></div>
+      <div class="sectionhead"><h3>Daily calorie history</h3></div>
+      <div class="card"><div class="chartwrap"><canvas id="calorieChart"></canvas></div></div>
+    </section>
+
+    <!-- ===================== Schedule ===================== -->
+    <section class="page" id="schedule">
+      <div class="sectionhead"><h3>This week's plan</h3><span class="pill">4 gym days</span></div>
+      <div class="days" id="weekDays"></div>
+      <div class="sectionhead"><h3>Four day diet cycle</h3></div>
+      <div class="workouts" id="dietCycle"></div>
+      <p class="note">The cycle started on November 1, 2026 as Day 1.</p>
+    </section>
+
+    <!-- ===================== Home tasks ===================== -->
+    <section class="page" id="chores">
+      <div class="module-hero"><span class="eyebrow">HOME MANAGEMENT</span><h2>Keep your space in order 🧹</h2><p>Cleaning, laundry, shopping, bedsheets and anything else you need to get done.</p></div>
+      <div class="module-stats" id="choreStats"></div>
+      <div class="sectionhead"><h3>Add a home task</h3></div>
+      <div class="card">
+        <form class="module-form" onsubmit="addChore(event)">
+          <input class="field" id="choreTitle" placeholder="e.g. Change bed sheets" required>
+          <select class="field" id="choreCategory"><option>Cleaning</option><option>Laundry</option><option>Shopping</option><option>Maintenance</option><option>Other</option></select>
+          <input class="field" id="choreDue" type="date" aria-label="Due date">
+          <button class="btn" type="submit">+ Add task</button>
+        </form>
+      </div>
+      <div class="sectionhead"><h3>To do list</h3><span class="pill" id="choreCount">0 tasks</span></div>
+      <div class="card"><div id="choreList" class="module-list"></div></div>
+    </section>
+
+    <!-- ===================== Work ===================== -->
+    <section class="page" id="work">
+      <div class="module-hero"><span class="eyebrow">WORK & PRODUCTIVITY</span><h2>Manage both jobs 💼</h2><p>Log hours by job, record what you worked on and review your week.</p></div>
+      <div class="module-stats" id="workStats"></div>
+      <div class="sectionhead"><h3>Log work session</h3></div>
+      <div class="card">
+        <form class="module-form" onsubmit="addWork(event)">
+          <input class="field" id="workJob" placeholder="Job or client name" required>
+          <input class="field" id="workDate" type="date" required aria-label="Work date">
+          <input class="field" id="workHours" type="number" min="0.1" max="24" step="0.25" inputmode="decimal" placeholder="Hours" required>
+          <input class="field" id="workDescription" placeholder="What did you work on?">
+          <button class="btn" type="submit">+ Log hours</button>
+        </form>
+      </div>
+      <div class="sectionhead"><h3>Work history</h3></div>
+      <div class="card"><div id="workList" class="module-list"></div></div>
+    </section>
+
+    <!-- ===================== Finance ===================== -->
+    <section class="page" id="finance">
+      <div class="module-hero"><span class="eyebrow">PERSONAL FINANCES</span><h2>Money & groceries 💳</h2><p>Track income and spending, and prepare a grocery list for your diet.</p></div>
+      <div class="module-stats" id="financeStats"></div>
+      <div class="sectionhead"><h3>Add transaction</h3></div>
+      <div class="card">
+        <form class="module-form" onsubmit="addTransaction(event)">
+          <select class="field" id="transactionType"><option value="expense">Expense</option><option value="income">Income</option></select>
+          <input class="field" id="transactionAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Amount (€)" required>
+          <select class="field" id="transactionCategory"><option>Groceries</option><option>Dining</option><option>Housing</option><option>Transport</option><option>Utilities</option><option>Health & Fitness</option><option>Salary</option><option>Other</option></select>
+          <input class="field" id="transactionNote" placeholder="Description" required>
+          <button class="btn" type="submit">+ Save</button>
+        </form>
+        <p class="note">Amounts are in EUR for now. MKD and currency conversion can come later.</p>
+      </div>
+      <div class="sectionhead"><h3>Spending by category</h3></div>
+      <div class="card"><div id="expenseBreakdown"></div></div>
+      <div class="sectionhead"><h3>Transactions</h3></div>
+      <div class="card"><div id="transactionList" class="module-list"></div></div>
+      <div class="sectionhead"><h3>🥬 Diet grocery planner</h3></div>
+      <div class="card">
+        <form class="module-form" onsubmit="addGrocery(event)">
+          <input class="field" id="groceryName" placeholder="e.g. Cucumbers, chicken, Greek yogurt" required>
+          <input class="field" id="groceryQty" placeholder="Quantity (e.g. 2 kg)">
+          <input class="field" id="groceryPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Estimated €">
+          <button class="btn" type="submit">+ Add grocery</button>
+        </form>
+        <div class="module-list" id="groceryList" style="margin-top:14px"></div>
+        <div class="grocery-total" id="groceryTotal"></div>
+      </div>
+    </section>
+
+    <!-- ===================== Settings ===================== -->
+    <section class="page" id="settings">
+      <div class="sectionhead"><h3>Personal targets</h3></div>
+      <div class="card">
+        <p><b>Starting weight:</b> 100 kg · <b>Goal:</b> 80 kg</p>
+        <form class="measure-form" id="targetsForm" onsubmit="saveTargets(event)">
+          <label>Calories (kcal/day)<input class="field" type="number" id="tCal" min="1200" max="4000" step="10" required></label>
+          <label>Protein (g/day)<input class="field" type="number" id="tProtein" min="40" max="300" required></label>
+          <label>Water (L/day)<input class="field" type="number" id="tWater" min="1" max="6" step="0.1" required></label>
+          <label>Steps (per day)<input class="field" type="number" id="tSteps" min="1000" max="30000" step="500" required></label>
+          <div><button class="btn" type="submit">Save targets</button></div>
+        </form>
+        <p class="note" id="targetStatus">These are starting values, not medical prescriptions.</p>
+      </div>
+
+      <div class="sectionhead"><h3>Cloud sync & AI logging</h3><span class="pill" id="syncPill">Not connected</span></div>
+      <div class="card">
+        <p class="muted" style="margin-top:0">Connect your Forma API to sync every device and let Claude or ChatGPT log meals for you.</p>
+        <form class="module-form" id="cloudForm" onsubmit="connectCloud(event)">
+          <input class="field" id="cloudUrl" type="url" placeholder="API URL, e.g. https://forma-api.you.workers.dev" required>
+          <input class="field" id="cloudKey" type="password" placeholder="Secret key" required autocomplete="off">
+          <button class="btn" type="submit">Connect</button>
+        </form>
+        <div id="cloudConnected" style="display:none;margin-top:14px">
+          <b>AI connector URL</b>
+          <p class="muted" style="margin:4px 0 8px">Add this as a custom connector in Claude (Settings → Connectors) or ChatGPT (developer mode). Keep it private, it works like a password.</p>
+          <div class="formrow">
+            <input class="field" id="mcpUrl" readonly onclick="this.select()">
+            <button class="btn secondary" type="button" onclick="copyMcp()">Copy</button>
+            <button class="btn outline" type="button" onclick="disconnectCloud()">Disconnect this device</button>
+          </div>
+        </div>
+        <p class="note" id="syncStatus"></p>
+      </div>
+
+      <div class="sectionhead"><h3>Your data</h3></div>
+      <div class="card">
+        <p class="muted">Your data is saved in this browser, and in the cloud when sync is connected. Export now and then as a backup, or use import to move it to another device.</p>
+        <div class="formrow">
+          <button class="btn secondary" onclick="exportData()">↓ Export my data (JSON)</button>
+          <label class="btn outline" style="display:inline-block;text-align:center">↑ Import backup<input type="file" accept="application/json" onchange="importData(this.files[0]);this.value=''" hidden></label>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<nav class="mobilebar" id="mobileNav" aria-label="Mobile navigation"></nav>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/nutrition.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/modules.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
