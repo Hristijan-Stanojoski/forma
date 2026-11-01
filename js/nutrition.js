@@ -106,28 +106,12 @@ function renderFoodList() {
 
   const list = dayFoods();
   if (editingFoodId && !list.some((f) => f.id === editingFoodId)) editingFoodId = null;
-  // Standard meals in order, then custom groups (e.g. a named bowl), drinks last
-  const groups = new Map(MEALS.filter((m) => m !== 'Drinks').map((m) => [m, []]));
-  for (const f of list) {
-    const g = f.meal || 'Snacks';
-    if (g === 'Drinks') continue;
-    if (!groups.has(g)) groups.set(g, []);
-    groups.get(g).push(f);
-  }
-  groups.set('Drinks', list.filter((f) => f.meal === 'Drinks'));
-  const filled = [...groups].filter(([, items]) => items.length);
-  box.innerHTML = filled.length
-    ? filled.map(([group, items]) => {
-        const sum = sumFoods(items);
-        const open = openMealGroups.has(group) || items.some((f) => f.id === editingFoodId);
-        return `<details class="diary-group meal-group" data-group="${escapeHTML(group)}" ${open ? 'open' : ''} ontoggle="toggleMealGroup(this)">
-          <summary class="diary-group-head">
-            <span class="meal-group-title"><b>${escapeHTML(MEAL_LABELS[group] || group)}</b><small>${items.length} item${items.length === 1 ? '' : 's'} · ${sum.p.toFixed(1)}g protein</small></span>
-            <strong>${Math.round(sum.cal)} kcal</strong><span class="chevron" aria-hidden="true">›</span>
-          </summary>
-          ${items.map((f) => (f.id === editingFoodId ? editFormHTML(f) : entryHTML(f))).join('')}
-        </details>`;
-      }).join('')
+  const groups = groupByMeal(list);
+  const editingGroup = groups.find(([, items]) => items.some((f) => f.id === editingFoodId));
+  if (editingGroup) openMealGroups.add(editingGroup[0]);
+  box.innerHTML = groups.length
+    ? groups.map(([group, items]) => mealGroupHTML(group, items, openMealGroups, 'openMealGroups',
+        items.map((f) => (f.id === editingFoodId ? editFormHTML(f) : entryHTML(f))).join(''))).join('')
     : `<div class="diary-empty">Nothing logged for ${isViewingToday() ? 'today' : dayLabel(nutritionDate)} yet. Use the form or a quick add above.</div>`;
 
   if (draft) fillEditForm(draft);
@@ -179,10 +163,6 @@ function readEditForm() {
 }
 function fillEditForm(draft) {
   for (const [id, value] of Object.entries(draft)) { const el = document.getElementById(id); if (el) el.value = value; }
-}
-
-function toggleMealGroup(el) {
-  if (el.open) openMealGroups.add(el.dataset.group); else openMealGroups.delete(el.dataset.group);
 }
 
 // ---------- editing ----------

@@ -50,6 +50,8 @@ function renderDashboard() {
   renderTasks();
 }
 
+const openDashboardGroups = new Set(); // meal groups expanded in the dashboard diary (collapsed by default)
+
 function renderDashboardDiary() {
   const date = today(), entries = state.foods[date] || [], sum = sumFoods(entries), done = !!state.completedDays[date];
   setText('diaryDate', formatDate(date).toUpperCase());
@@ -64,17 +66,9 @@ function renderDashboardDiary() {
   setText('diaryStatus', done ? 'Day completed' : 'Logging in progress');
   setText('diaryNote', done ? 'Day marked complete · Nutrition values are estimates.' : 'Nutrition values are estimates · Your day is still open for more food and drinks.');
 
-  const groups = new Map();
-  for (const f of entries) {
-    const group = f.meal || 'Other food';
-    if (!groups.has(group)) groups.set(group, []);
-    groups.get(group).push(f);
-  }
   document.getElementById('dashboardMeals').innerHTML = entries.length
-    ? [...groups].map(([group, items]) => `<div class="diary-group">
-        <div class="diary-group-head"><b>${escapeHTML(MEAL_LABELS[group] || group)}</b><strong>${Math.round(sumFoods(items).cal)} kcal</strong></div>
-        ${items.map((f) => `<div class="diary-entry"><span>${escapeHTML(f.name)} <small>· ${escapeHTML(f.qty || 'portion not specified')}</small></span><strong>${Math.round(Number(f.cal || 0))} kcal</strong></div>`).join('')}
-      </div>`).join('')
+    ? groupByMeal(entries).map(([group, items]) => mealGroupHTML(group, items, openDashboardGroups, 'openDashboardGroups',
+        items.map((f) => `<div class="diary-entry"><span>${escapeHTML(f.name)} <small>· ${escapeHTML(f.qty || 'portion not specified')}</small></span><strong>${Math.round(Number(f.cal || 0))} kcal</strong></div>`).join(''))).join('')
     : '<div class="diary-empty">No meals logged for this date yet. Open Nutrition to add your first entry, or just tell your AI assistant what you ate.</div>';
 }
 

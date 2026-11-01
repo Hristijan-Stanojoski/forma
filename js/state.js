@@ -63,6 +63,33 @@ function sumFoods(list) {
     c: a.c + Number(f.c || 0), fat: a.fat + Number(f.fat || 0),
   }), { cal: 0, p: 0, c: 0, fat: 0 });
 }
+// [group, items] pairs: standard meals in order, then custom groups (e.g. a named bowl), drinks last.
+function groupByMeal(list) {
+  const groups = new Map(MEALS.filter((m) => m !== 'Drinks').map((m) => [m, []]));
+  for (const f of list) {
+    const g = f.meal || 'Snacks';
+    if (g === 'Drinks') continue;
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(f);
+  }
+  groups.set('Drinks', list.filter((f) => f.meal === 'Drinks'));
+  return [...groups].filter(([, items]) => items.length);
+}
+// Collapsible meal group. openSet remembers which groups the user expanded on that page.
+function mealGroupHTML(group, items, openSet, setName, body) {
+  const sum = sumFoods(items);
+  return `<details class="diary-group meal-group" data-group="${escapeHTML(group)}" ${openSet.has(group) ? 'open' : ''} ontoggle="toggleMealGroup(this, ${setName})">
+      <summary class="diary-group-head">
+        <span class="meal-group-title"><b>${escapeHTML(MEAL_LABELS[group] || group)}</b><small>${items.length} item${items.length === 1 ? '' : 's'} · ${sum.p.toFixed(1)}g protein</small></span>
+        <strong>${Math.round(sum.cal)} kcal</strong><span class="chevron" aria-hidden="true">›</span>
+      </summary>
+      ${body}
+    </details>`;
+}
+function toggleMealGroup(el, openSet) {
+  if (el.open) openSet.add(el.dataset.group); else openSet.delete(el.dataset.group);
+}
+
 const foodToday = () => state.foods[today()] || [];
 const totals = () => sumFoods(foodToday());
 function currentWeight() {
