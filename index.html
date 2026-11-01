@@ -44,6 +44,23 @@
 
     <!-- ===================== Dashboard ===================== -->
     <section class="page active" id="dashboard">
+      <div class="hero">
+        <div>
+          <small>YOUR BIG GOAL</small>
+          <h2>Road to 80 kg 🎯</h2>
+          <p>Every healthy choice moves you closer.</p>
+          <div class="hero-progress">
+            <div class="bar"><i id="goalbar"></i></div>
+            <div class="hero-metrics"><span>Started at 100 kg</span><span id="goalpercent">0% complete</span><span>Goal: 80 kg</span></div>
+          </div>
+        </div>
+        <div class="goal-grid">
+          <div class="goal-stat"><small>Current weight</small><strong id="currentWeight">100 kg</strong></div>
+          <div class="goal-stat"><small>Remaining</small><strong id="remaining">20 kg</strong></div>
+        </div>
+      </div>
+      <div id="weightInsight" class="insight good" role="status"></div>
+
       <div class="sectionhead"><h3>Today's overview</h3><span class="pill" id="dietPill"></span></div>
       <div class="metrics">
         <div class="card metric"><div class="ico">🔥</div><div class="label">CALORIES EATEN</div><div><strong id="calorieMetric">0</strong><small id="calorieLimitLabel"></small></div><div class="track"><i id="calbar"></i></div><p class="metric-left" id="calorieLeft"></p></div>
@@ -99,23 +116,7 @@
       </div>
 
       <div class="sectionhead"><h3>Progress insights</h3><a onclick="go('progress')">View analytics →</a></div>
-      <div class="hero">
-        <div>
-          <small>YOUR BIG GOAL</small>
-          <h2>Road to 80 kg 🎯</h2>
-          <p>Every healthy choice moves you closer.</p>
-          <div class="hero-progress">
-            <div class="bar"><i id="goalbar"></i></div>
-            <div class="hero-metrics"><span>Started at 100 kg</span><span id="goalpercent">0% complete</span><span>Goal: 80 kg</span></div>
-          </div>
-        </div>
-        <div class="goal-grid">
-          <div class="goal-stat"><small>Current weight</small><strong id="currentWeight">100 kg</strong></div>
-          <div class="goal-stat"><small>Remaining</small><strong id="remaining">20 kg</strong></div>
-        </div>
-      </div>
-      <div id="weightInsight" class="insight good" role="status"></div>
-      <div class="twocol" style="margin-top:16px">
+      <div class="twocol">
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b>Weight journey</b><span class="pill">Goal: 80 kg</span></div>
           <div class="chartwrap"><canvas id="weightChart"></canvas></div>
